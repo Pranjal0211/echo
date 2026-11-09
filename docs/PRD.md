@@ -1,13 +1,22 @@
 # ECHO — AI Communication Twin
 
 **Product Requirements Document (PRD) + implementation blueprint**  
-**Version:** 1.0  
+**Version:** 1.1  
 **Date:** 2026-11-08  
-**Status:** Proposed / ready for technical discovery  
-**Primary audience:** Product owner, Codex, Claude Code, designers, and engineering collaborators  
+**Status:** Accepted baseline. Open review items are tracked in `docs/ROAST.md` and resolved one at a time via `docs/GRILL.md`.  
+**Owner:** Pranjal Sharma  
+**Builder:** Claude Code (single agent)  
 **Initial release:** Private single-user application  
 
 > **North star:** Make professional communication fast, personal, accurate, and accountable. Echo should understand how the user writes, help with job searching, and reduce the friction between receiving a message and sending a thoughtful reply.
+
+> **The pain behind it (owner's words):** recruiter and referral messages on Gmail and LinkedIn get answered late or not at all. Today every reply means copying the message into ChatGPT, getting a draft, and pasting it back. Echo should show those messages in one dashboard with a draft ready, so the owner only has to approve and send.
+
+### Changes from v1.0
+- Built by Claude Code alone; the Codex / ChatGPT / integrator split in section 13 is replaced.
+- Input is pasted text (and Gmail sync later). No screenshot capture.
+- LinkedIn support is optional: copy-paste assist only, because LinkedIn's developer access doesn't allow sending replies.
+- Stack, architecture, milestones and guardrails are unchanged from v1.0.
 
 ## 1. Executive summary
 
@@ -548,9 +557,13 @@ echo/
 ├── tests/                     # integration and E2E
 ├── docs/
 │   ├── PRD.md
-│   ├── architecture.md
-│   ├── decisions.md
-│   └── API_CONTRACTS.md
+│   ├── ARCHITECTURE.md
+│   ├── DECISIONS.md
+│   ├── ROAST.md               # open review items
+│   ├── GRILL.md               # questions that resolve them
+│   ├── API_CONTRACTS.md       # added in Milestone 0
+│   ├── tasks/                 # work tickets
+│   └── assets/                # concept mockups
 ├── AGENTS.md
 ├── CLAUDE.md
 └── README.md
@@ -566,44 +579,36 @@ echo/
 - Documentation and screenshots updated.
 - One focused PR with no unrelated files.
 
-## 13. Multi-agent development handoff (Codex + Claude Code + ChatGPT)
+## 13. Development process (single builder: Claude Code)
 
-Treat this PRD as the **product source of truth**. Use the companion `AGENTS.md`, `CLAUDE.md`, and `agent_tasks/` files in this build kit as initial instructions. Put all agents in the **same repository**, but avoid concurrent edits to the same files.
+Treat this PRD as the **product source of truth**, with `docs/DECISIONS.md` for choices and `docs/ROAST.md` for open review items. Claude Code builds every layer; the owner reviews and merges. Work tickets live in `docs/tasks/`.
 
-### 13.1 Suggested responsibilities
+### 13.1 Roles
 
-| Contributor | Initial workstream | Owned files / boundaries |
-|---|---|---|
-| Codex | Domain architecture + database contracts | `packages/contracts`, `packages/core`, `supabase/migrations`, `docs/API_CONTRACTS.md` |
-| Claude Code | React UX using mocked API data | `apps/web`, `docs/UX_NOTES.md` |
-| ChatGPT (product/reviewer) | Feature decisions, test cases, architecture review and eval criteria | PRD, review comments, acceptance tests |
-| Integrator (user or designated agent) | Merge shared contracts and PRs | Main branch; resolves conflicts and runs full CI |
-
-This is only an initial split. Once shared types and endpoints stabilize, backend connectors and AI prompts can be assigned independently. All agents must propose changes to cross-owned contracts rather than modifying them without coordination.
+| Who | Does |
+|---|---|
+| Owner (Pranjal) | Decides scope and answers `docs/GRILL.md`; reviews and merges every PR; approves OAuth scopes, cloud permissions and enabling real sends |
+| Claude Code | Contracts, database, backend, UI, tests and docs, one vertical slice at a time |
+| ChatGPT (optional) | Second opinions on product and test cases; no direct repo edits |
 
 ### 13.2 Work discipline
 
-1. Branch per feature: `feat/echo-###-short-name`.
-2. Atomic, conventional commits (`feat:`, `fix:`, `test:`, `docs:`).
-3. Open a PR for each vertical slice; require build/test checks.
-4. Shared API contracts are reviewed before frontend/backend implementation diverges.
+1. Branch per change (`feat/…`, `fix/…`, `docs/…`); never push to `main`.
+2. Small, conventional commits (`feat:`, `fix:`, `test:`, `docs:`), one logical change each.
+3. One PR per vertical slice; build, lint, typecheck and tests pass first. The owner merges; no auto-merge.
+4. API contracts are written before the endpoint and UI that use them.
 5. The database schema is migrated, not hand-modified in production.
 6. Never connect/send from a real Gmail account in test suites.
-7. Keep a decision log: issue, alternatives, choice, trade-off, date.
-8. No agent silently expands product scope or bypasses the LinkedIn constraint.
-9. Human reviews real OAuth requests, cloud permissions and outbound-send enablement.
-10. During integration, merge contracts/migrations first, then backend, then UI.
+7. Meaningful decisions go in `docs/DECISIONS.md`: issue, alternatives, choice, trade-off, date.
+8. No silent scope growth and no bypassing the LinkedIn constraint.
+9. The owner reviews real OAuth requests, cloud permissions and outbound-send enablement.
 
-### 13.3 Parallelization plan
+### 13.3 Build sequence for Milestones 0–1
 
-**Iteration 1:** Codex defines database/domain contracts while Claude Code builds screens with mock data. Product owner validates copy, UX, and priorities.  
-**Iteration 2:** Codex builds validated backend endpoints; Claude Code wires UI to published contracts. Both add tests in owned areas.  
-**Iteration 3:** A designated owner implements Gmail integration behind mocks and explicit approvals; another agent builds eval fixtures and style-memory experiments.  
-**Iteration 4:** Integrator runs end-to-end tests and security checks before any real send.
-
-### 13.4 Ready-to-use instructions for any AI developer
-
-> Read `ECHO_PRD.md` completely before coding. Implement only Milestone 0 and Milestone 1 unless the user changes scope. Do not implement LinkedIn scraping or automated DMs. Do not send real Gmail messages. Start with mock connectors, a clean contract-first architecture, and testable vertical slices. Respect file ownership and propose architecture changes via `docs/decisions.md`. Explain trade-offs briefly; commit atomically.
+1. Contracts + database (`docs/tasks/01_contracts_and_db.md`).
+2. Web UI on mocked API (`docs/tasks/02_frontend.md`).
+3. Wire the UI to the real Workers API.
+4. Gmail outbound (`docs/tasks/03_gmail_outbound.md`) only after 1–3 are merged.
 
 ## 14. Test and evaluation plan
 
@@ -667,6 +672,8 @@ Use ~30–50 **consented/redacted** examples spanning: recruiter cold outreach, 
 - [ ] Model and hosting usage are observable and capped.
 
 ## 17. Decision log — initial architecture decisions
+
+Current status of each decision: `docs/DECISIONS.md`.
 
 | ID | Decision | Why | Revisit when |
 |---|---|---|---|
