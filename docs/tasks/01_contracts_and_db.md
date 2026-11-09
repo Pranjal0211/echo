@@ -1,6 +1,6 @@
-# Task 01 — Domain contracts and database (Codex)
+# Task 01 — Domain contracts and database
 
-**Milestone:** 0–1. **Owned paths:** `packages/contracts`, `packages/core`, `supabase/migrations`, `docs/API_CONTRACTS.md`.
+**Milestone:** 0–1. **Builder:** Claude Code. **Paths:** `packages/contracts`, `packages/core`, `supabase/migrations`, `docs/API_CONTRACTS.md`.
 
 ## Deliverables
 1. Monorepo structure only where needed by the task.
