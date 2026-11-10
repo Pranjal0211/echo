@@ -120,7 +120,7 @@ Without a key, drafts come from a deterministic fake model (the panel says "Draf
 
 1. Create a free API key at [Google AI Studio](https://aistudio.google.com/apikey).
 2. Copy `workers/api/.dev.vars.example` to `workers/api/.dev.vars` (git-ignored) and paste the key after `GEMINI_API_KEY=`.
-3. Restart `npm run dev`. The reply panel now says "Drafted by gemini-3.8-flash".
+3. Restart `npm run dev`. The reply panel now says "Drafted by gemini-3.8-flash", or "gemini-3.5-flash-lite" when 3.8 is busy and Echo falls back.
 
 On the free tier, Google may use what you send to improve its products, and human reviewers may read it ([ADR-019](docs/DECISIONS.md)). Tests never call Gemini.
 
