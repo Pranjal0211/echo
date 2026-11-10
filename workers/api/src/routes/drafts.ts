@@ -6,7 +6,7 @@ import {
   UpdateDraftRequest,
   type Draft,
 } from "@echo/contracts";
-import { detectDecisionsNeeded, ModelOutputError } from "@echo/ai";
+import { missingDecisions, ModelOutputError, stripFactIds } from "@echo/ai";
 import {
   applyEdit,
   assertCanDraftFor,
@@ -56,11 +56,12 @@ export function draftRoutes({ store, model, now, newId }: AppDeps) {
     });
     const parsed = ModelDraftOutput.safeParse(raw);
     if (!parsed.success) throw new ModelOutputError(parsed.error.message);
-    const output = enforceGrounding(parsed.data, facts);
+    const grounded = enforceGrounding(parsed.data, facts);
+    const output = { ...grounded, body: stripFactIds(grounded.body, profile.facts.map((f) => f.id)) };
 
     const lastInbound = [...conversation.messages].reverse().find((m) => m.direction === "inbound");
     const decisionsNeeded = [
-      ...new Set([...output.decisionsNeeded, ...(lastInbound ? detectDecisionsNeeded(lastInbound.content) : [])]),
+      ...new Set([...output.decisionsNeeded, ...(lastInbound ? missingDecisions(lastInbound.content, output.decisionsNeeded) : [])]),
     ];
 
     const at = now().toISOString();
@@ -79,7 +80,7 @@ export function draftRoutes({ store, model, now, newId }: AppDeps) {
       factIdsUsed: output.factIdsUsed,
       warnings: output.warnings,
       decisionsNeeded,
-      modelId: model.modelId,
+      modelId: raw.modelId ?? model.modelId,
       createdAt: at,
       updatedAt: at,
     };
