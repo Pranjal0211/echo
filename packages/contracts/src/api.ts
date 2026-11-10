@@ -4,10 +4,12 @@ import {
   Contact,
   Conversation,
   Draft,
+  FactCategory,
   Length,
   Profile,
   Relationship,
   ReplyIntent,
+  Sensitivity,
   Tone,
 } from "./domain.ts";
 
@@ -67,6 +69,62 @@ export type DraftResponse = z.infer<typeof DraftResponse>;
 
 export const ProfileResponse = z.object({ profile: Profile });
 export type ProfileResponse = z.infer<typeof ProfileResponse>;
+
+export const MAX_FACT_CHARS = 500;
+export const MAX_RESUME_CHARS = 30_000;
+
+/** PATCH /api/profile — creates the profile on a fresh database when `name` is given. */
+export const UpdateProfileRequest = z
+  .object({
+    name: z.string().trim().min(1).max(200),
+    headline: z.string().trim().max(200),
+    styleNotes: z.array(z.string().trim().min(1).max(200)).max(20),
+  })
+  .partial()
+  .refine((body) => Object.keys(body).length > 0, { message: "Change at least one field." });
+export type UpdateProfileRequest = z.infer<typeof UpdateProfileRequest>;
+
+/** POST /api/profile/facts — a fact the owner typed, so it starts verified. */
+export const CreateFactRequest = z.object({
+  text: z.string().trim().min(1).max(MAX_FACT_CHARS),
+  category: FactCategory,
+  sensitivity: Sensitivity.default("normal"),
+});
+export type CreateFactRequest = z.input<typeof CreateFactRequest>;
+
+/** PATCH /api/profile/facts/:id — edit, approve (`verified: true`) or mark sensitive. */
+export const UpdateFactRequest = z
+  .object({
+    text: z.string().trim().min(1).max(MAX_FACT_CHARS),
+    category: FactCategory,
+    sensitivity: Sensitivity,
+    verified: z.boolean(),
+  })
+  .partial()
+  .refine((body) => Object.keys(body).length > 0, { message: "Change at least one field." });
+export type UpdateFactRequest = z.infer<typeof UpdateFactRequest>;
+
+/** POST /api/profile/examples — a message the owner wrote, used as a style example. */
+export const CreateStyleExampleRequest = z.object({
+  situation: z.string().trim().min(1).max(200),
+  text: z.string().trim().min(1).max(2_000),
+});
+export type CreateStyleExampleRequest = z.infer<typeof CreateStyleExampleRequest>;
+
+/** POST /api/profile/facts/suggest — the resume text is used once and never stored. */
+export const SuggestFactsRequest = z.object({
+  resumeText: z.string().trim().min(1).max(MAX_RESUME_CHARS),
+});
+export type SuggestFactsRequest = z.infer<typeof SuggestFactsRequest>;
+
+export const SuggestFactsResponse = z.object({
+  profile: Profile,
+  /** New unverified facts waiting for the owner's review. */
+  added: z.number().int().nonnegative(),
+  /** Suggestions dropped as duplicates or because they held contact details. */
+  skipped: z.number().int().nonnegative(),
+});
+export type SuggestFactsResponse = z.infer<typeof SuggestFactsResponse>;
 
 export const ApiErrorCode = z.enum([
   "bad_request",

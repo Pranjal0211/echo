@@ -7,6 +7,7 @@ import type {
   Profile,
   ProfileFact,
   ReplyIntent,
+  SuggestedFact,
   Tone,
 } from "@echo/contracts";
 
@@ -32,6 +33,12 @@ export interface DraftModel {
   /** The preferred model; a result's `modelId` wins when the adapter fell back. */
   readonly modelId: string;
   generateDraft(context: DraftContext): Promise<ModelDraftResult>;
+}
+
+/** Finds facts in a pasted resume (Knowledge Base). The owner approves each one before use. */
+export interface FactSuggester {
+  readonly modelId: string;
+  suggestFacts(resumeText: string): Promise<SuggestedFact[]>;
 }
 
 export class ModelOutputError extends Error {

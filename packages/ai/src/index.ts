@@ -4,3 +4,4 @@ export * from "./decisions.ts";
 export * from "./fake-model.ts";
 export * from "./gemini-model.ts";
 export * from "./body-cleanup.ts";
+export * from "./fact-suggestions.ts";

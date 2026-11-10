@@ -59,7 +59,10 @@ export function toErrorResponse(err: unknown, c: Context): Response {
     const status = err.reason === "rate_limited" ? 429 : 503;
     return c.json({ error: { code: "model_error", message: err.message } }, status);
   }
-  if (err instanceof MissingProfileError || err instanceof StoreConfigError) {
+  if (err instanceof MissingProfileError) {
+    return c.json({ error: { code: "not_found", message: err.message } }, 404);
+  }
+  if (err instanceof StoreConfigError) {
     return c.json({ error: { code: "storage_error", message: err.message } }, 503);
   }
   if (err instanceof StoreError) {

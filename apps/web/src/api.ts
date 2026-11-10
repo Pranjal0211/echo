@@ -4,9 +4,14 @@ import {
   InboxItem,
   InboxResponse,
   ProfileResponse,
+  SuggestFactsResponse,
   type CreateConversationRequest,
+  type CreateFactRequest,
+  type CreateStyleExampleRequest,
   type GenerateDraftRequest,
   type UpdateDraftRequest,
+  type UpdateFactRequest,
+  type UpdateProfileRequest,
 } from "@echo/contracts";
 import type { z } from "zod";
 
@@ -45,6 +50,8 @@ async function request<S extends z.ZodType>(path: string, schema: S, init?: Requ
 }
 
 const post = (body: unknown): RequestInit => ({ method: "POST", body: JSON.stringify(body) });
+const patch = (body: unknown): RequestInit => ({ method: "PATCH", body: JSON.stringify(body) });
+const del: RequestInit = { method: "DELETE" };
 
 export const api = {
   inbox: () => request("/api/inbox", InboxResponse),
@@ -55,4 +62,11 @@ export const api = {
     request(`/api/drafts/${id}`, DraftResponse, { method: "PATCH", body: JSON.stringify(body) }),
   copyDraft: (id: string, version: number) => request(`/api/drafts/${id}/copy`, DraftResponse, post({ version })),
   markSent: (id: string, version: number) => request(`/api/drafts/${id}/mark-sent`, DraftResponse, post({ version })),
+  updateProfile: (body: UpdateProfileRequest) => request("/api/profile", ProfileResponse, patch(body)),
+  addFact: (body: CreateFactRequest) => request("/api/profile/facts", ProfileResponse, post(body)),
+  updateFact: (id: string, body: UpdateFactRequest) => request(`/api/profile/facts/${encodeURIComponent(id)}`, ProfileResponse, patch(body)),
+  deleteFact: (id: string) => request(`/api/profile/facts/${encodeURIComponent(id)}`, ProfileResponse, del),
+  suggestFacts: (resumeText: string) => request("/api/profile/facts/suggest", SuggestFactsResponse, post({ resumeText })),
+  addStyleExample: (body: CreateStyleExampleRequest) => request("/api/profile/examples", ProfileResponse, post(body)),
+  deleteStyleExample: (id: string) => request(`/api/profile/examples/${encodeURIComponent(id)}`, ProfileResponse, del),
 };

@@ -18,7 +18,7 @@ export const SCREENS: ReadonlyArray<{ id: ScreenId; label: string; icon: LucideI
   { id: "outreach", label: "Outreach Studio", icon: Send, milestone: "Milestone 1" },
   { id: "jobs", label: "Jobs", icon: Briefcase, milestone: "Milestone 1" },
   { id: "contacts", label: "Contacts", icon: Users, milestone: "Milestone 1" },
-  { id: "knowledge", label: "Knowledge Base", icon: BookOpen, milestone: "Milestone 1" },
+  { id: "knowledge", label: "Knowledge Base", icon: BookOpen },
   { id: "digest", label: "Daily Digest", icon: CalendarDays, milestone: "Milestone 5" },
   { id: "settings", label: "Settings", icon: Settings, milestone: "Milestone 2" },
 ];
@@ -66,7 +66,7 @@ export function Sidebar({
         ))}
       </nav>
       <p className="mt-auto hidden px-5 py-4 text-xs text-muted md:block">
-        Synthetic data. Nothing is sent without your approval.
+        Nothing is sent without your approval.
       </p>
     </aside>
   );

@@ -3,6 +3,7 @@ import { Sidebar, type ScreenId } from "./components/sidebar.tsx";
 import { useInbox, useNow, useProfile } from "./hooks.ts";
 import { ComingSoon } from "./screens/coming-soon.tsx";
 import { InboxScreen } from "./screens/inbox.tsx";
+import { KnowledgeBaseScreen } from "./screens/knowledge-base.tsx";
 
 export function App() {
   const [screen, setScreen] = useState<ScreenId>("inbox");
@@ -22,8 +23,10 @@ export function App() {
             error={inbox.error}
             now={now}
             onChanged={inbox.reload}
-            facts={profile?.facts ?? []}
+            facts={profile.profile?.facts ?? []}
           />
+        ) : screen === "knowledge" ? (
+          <KnowledgeBaseScreen state={profile} />
         ) : (
           <ComingSoon screen={screen} />
         )}

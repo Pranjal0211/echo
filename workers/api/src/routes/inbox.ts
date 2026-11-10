@@ -13,8 +13,6 @@ export function inboxRoutes({ store, now, newId }: AppDeps) {
   const routes = new Hono();
   routes.onError(toErrorResponse);
 
-  routes.get("/profile", async (c) => c.json({ profile: await store.getProfile() }));
-
   /** Conversations as the inbox shows them: waiting on me first, oldest first. */
   routes.get("/inbox", async (c) => {
     const conversations = (await store.listConversations()).sort(compareByWaiting);

@@ -11,7 +11,7 @@ function appWithFailingStore(error: Error) {
   store.listConversations = async () => {
     throw error;
   };
-  return createApp({ store, model: new FakeDraftModel(), now: () => new Date(), newId: () => "id" });
+  return createApp({ store, model: new FakeDraftModel(), suggester: new FakeDraftModel(), now: () => new Date(), newId: () => "id" });
 }
 
 describe("storage errors", () => {
@@ -24,9 +24,9 @@ describe("storage errors", () => {
     expect(body.error.message).not.toMatch(/10\.0\.0\.5/);
   });
 
-  it("explains how to add a profile when the database is empty", async () => {
+  it("answers 404 with how to add a profile when the database is empty", async () => {
     const res = await appWithFailingStore(new MissingProfileError()).request("/api/inbox");
-    expect(res.status).toBe(503);
+    expect(res.status).toBe(404);
     expect(ApiError.parse(await res.json()).error.message).toMatch(/db:seed/);
   });
 });

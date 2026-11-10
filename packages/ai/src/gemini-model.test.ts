@@ -120,3 +120,37 @@ describe("GeminiDraftModel", () => {
     }
   });
 });
+
+describe("GeminiDraftModel.suggestFacts", () => {
+  const FACTS = { facts: [{ text: "Four years of React", category: "experience", sensitivity: "normal" }] };
+
+  it("sends the resume as data with the facts schema and returns the parsed facts", async () => {
+    const { fn, calls } = fakeFetch(interaction(JSON.stringify(FACTS)));
+    const facts = await new GeminiDraftModel({ apiKey: "k", fetch: fn }).suggestFacts("- Four years of React");
+    expect(facts).toEqual(FACTS.facts);
+    const body = JSON.parse(String(calls[0]?.init.body));
+    expect(body.store).toBe(false);
+    expect(body.input).toContain("<resume>");
+    expect(body.system_instruction).toContain("Never infer");
+    expect(body.response_format.schema.required).toEqual(["facts"]);
+  });
+
+  it("falls back to the next model when the first is overloaded", async () => {
+    const calls: string[] = [];
+    const fn = (async (_url: string, init: RequestInit) => {
+      const model = JSON.parse(String(init.body)).model as string;
+      calls.push(model);
+      return model === "busy-model"
+        ? new Response("{}", { status: 503 })
+        : new Response(JSON.stringify(interaction(JSON.stringify(FACTS))), { status: 200 });
+    }) as unknown as typeof fetch;
+    const model = new GeminiDraftModel({ apiKey: "k", model: "busy-model", fallbackModels: ["lite-model"], fetch: fn });
+    expect(await model.suggestFacts("- Four years of React")).toEqual(FACTS.facts);
+    expect(calls).toEqual(["busy-model", "lite-model"]);
+  });
+
+  it("rejects output that doesn't match the schema", async () => {
+    const { fn } = fakeFetch(interaction(JSON.stringify({ facts: [{ text: "x" }] })));
+    await expect(new GeminiDraftModel({ apiKey: "k", fetch: fn }).suggestFacts("- x")).rejects.toThrow(ModelOutputError);
+  });
+});

@@ -1,4 +1,4 @@
-import { type DraftModel, ModelUnavailableError, type ModelUnavailableReason } from "@echo/ai";
+import { type DraftModel, FakeDraftModel, ModelUnavailableError, type ModelUnavailableReason } from "@echo/ai";
 import { InboxResponse } from "@echo/contracts";
 import { describe, expect, it } from "vitest";
 import { createApp } from "./app.ts";
@@ -13,7 +13,7 @@ function appWithFailingModel(reason: ModelUnavailableReason, message: string) {
       throw new ModelUnavailableError(reason, message);
     },
   };
-  return createApp({ store: new InMemoryStore(buildSeed(TEST_NOW)), model, now: () => TEST_NOW, newId: () => "d" });
+  return createApp({ store: new InMemoryStore(buildSeed(TEST_NOW)), model, suggester: new FakeDraftModel(), now: () => TEST_NOW, newId: () => "d" });
 }
 
 const generate = (app: ReturnType<typeof createApp>) =>

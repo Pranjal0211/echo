@@ -1,11 +1,14 @@
+import type { SuggestedFact } from "@echo/contracts";
+import { buildFactPrompt, parseFactOutput } from "./fact-suggestions.ts";
 import {
   type DraftContext,
   type DraftModel,
+  type FactSuggester,
   type ModelDraftResult,
   ModelOutputError,
   ModelUnavailableError,
 } from "./model.ts";
-import { buildDraftPrompt, parseModelOutput } from "./prompt.ts";
+import { buildDraftPrompt, type DraftPrompt, parseModelOutput } from "./prompt.ts";
 
 export const GEMINI_DEFAULT_MODEL = "gemini-3.8-flash";
 /** Used when the default is overloaded or rate limited on the free tier. */
@@ -24,6 +27,28 @@ const DRAFT_SCHEMA = {
     decisionsNeeded: { type: "array", items: { type: "string" }, description: "Questions only the owner can answer." },
   },
   required: ["subject", "body", "factIdsUsed", "warnings", "decisionsNeeded"],
+  additionalProperties: false,
+} as const;
+
+/** JSON Schema for FactSuggestionOutput. */
+const FACTS_SCHEMA = {
+  type: "object",
+  properties: {
+    facts: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          text: { type: "string" },
+          category: { type: "string", enum: ["experience", "skill", "project", "education", "preference", "other"] },
+          sensitivity: { type: "string", enum: ["normal", "ask_every_time"] },
+        },
+        required: ["text", "category", "sensitivity"],
+        additionalProperties: false,
+      },
+    },
+  },
+  required: ["facts"],
   additionalProperties: false,
 } as const;
 
@@ -47,7 +72,7 @@ interface InteractionResponse {
  * `store: false` keeps Google from saving the interaction for later retrieval.
  * Free-tier prompts may still be used by Google to improve its products.
  */
-export class GeminiDraftModel implements DraftModel {
+export class GeminiDraftModel implements DraftModel, FactSuggester {
   readonly modelId: string;
   readonly #fallbacks: string[];
   readonly #apiKey: string;
@@ -62,10 +87,23 @@ export class GeminiDraftModel implements DraftModel {
 
   async generateDraft(context: DraftContext): Promise<ModelDraftResult> {
     const prompt = buildDraftPrompt(context);
+    return this.#withFallback(async (model) => ({
+      ...parseModelOutput(await this.#call(model, prompt, DRAFT_SCHEMA, 2048)),
+      modelId: model,
+    }));
+  }
+
+  async suggestFacts(resumeText: string): Promise<SuggestedFact[]> {
+    const prompt = buildFactPrompt(resumeText);
+    return this.#withFallback(async (model) => parseFactOutput(await this.#call(model, prompt, FACTS_SCHEMA, 4096)));
+  }
+
+  /** Try the preferred model, then each fallback, while the failure is overload or rate limiting. */
+  async #withFallback<T>(run: (model: string) => Promise<T>): Promise<T> {
     const models = [this.modelId, ...this.#fallbacks];
     for (const [i, model] of models.entries()) {
       try {
-        return { ...(await this.#call(model, prompt)), modelId: model };
+        return await run(model);
       } catch (err) {
         const retryable = err instanceof ModelUnavailableError && (err.reason === "unavailable" || err.reason === "rate_limited");
         if (!retryable || i === models.length - 1) throw err;
@@ -74,7 +112,8 @@ export class GeminiDraftModel implements DraftModel {
     throw new ModelUnavailableError("unavailable", "No Gemini model is configured.");
   }
 
-  async #call(model: string, prompt: { system: string; user: string }) {
+  /** One Interactions API call; returns the output text. */
+  async #call(model: string, prompt: DraftPrompt, schema: object, maxOutputTokens: number): Promise<string> {
     let response: Response;
     try {
       response = await this.#fetch(ENDPOINT, {
@@ -85,8 +124,8 @@ export class GeminiDraftModel implements DraftModel {
           system_instruction: prompt.system,
           input: prompt.user,
           store: false,
-          generation_config: { thinking_level: "low", max_output_tokens: 2048 },
-          response_format: { type: "text", mime_type: "application/json", schema: DRAFT_SCHEMA },
+          generation_config: { thinking_level: "low", max_output_tokens: maxOutputTokens },
+          response_format: { type: "text", mime_type: "application/json", schema },
         }),
         signal: AbortSignal.timeout(TIMEOUT_MS),
       });
@@ -98,7 +137,7 @@ export class GeminiDraftModel implements DraftModel {
     const interaction = (await response.json().catch(() => {
       throw new ModelOutputError("Gemini returned invalid JSON.");
     })) as InteractionResponse;
-    return parseModelOutput(outputText(interaction));
+    return outputText(interaction);
   }
 }
 
