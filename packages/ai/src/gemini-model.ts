@@ -1,8 +1,15 @@
-import type { ModelDraftOutput } from "@echo/contracts";
-import { type DraftContext, type DraftModel, ModelOutputError, ModelUnavailableError } from "./model.ts";
+import {
+  type DraftContext,
+  type DraftModel,
+  type ModelDraftResult,
+  ModelOutputError,
+  ModelUnavailableError,
+} from "./model.ts";
 import { buildDraftPrompt, parseModelOutput } from "./prompt.ts";
 
 export const GEMINI_DEFAULT_MODEL = "gemini-3.8-flash";
+/** Used when the default is overloaded or rate limited on the free tier. */
+export const GEMINI_DEFAULT_FALLBACK = "gemini-3.5-flash-lite";
 const ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/interactions";
 const TIMEOUT_MS = 30_000;
 
@@ -23,6 +30,8 @@ const DRAFT_SCHEMA = {
 export interface GeminiOptions {
   apiKey: string;
   model?: string;
+  /** Tried in order when a model is overloaded (5xx) or rate limited (429). */
+  fallbackModels?: string[];
   /** Injected in tests; defaults to the global fetch. */
   fetch?: typeof fetch;
 }
@@ -40,24 +49,39 @@ interface InteractionResponse {
  */
 export class GeminiDraftModel implements DraftModel {
   readonly modelId: string;
+  readonly #fallbacks: string[];
   readonly #apiKey: string;
   readonly #fetch: typeof fetch;
 
   constructor(options: GeminiOptions) {
     this.modelId = options.model ?? GEMINI_DEFAULT_MODEL;
+    this.#fallbacks = (options.fallbackModels ?? []).filter((m) => m && m !== this.modelId);
     this.#apiKey = options.apiKey;
     this.#fetch = options.fetch ?? ((input, init) => fetch(input, init));
   }
 
-  async generateDraft(context: DraftContext): Promise<ModelDraftOutput> {
+  async generateDraft(context: DraftContext): Promise<ModelDraftResult> {
     const prompt = buildDraftPrompt(context);
+    const models = [this.modelId, ...this.#fallbacks];
+    for (const [i, model] of models.entries()) {
+      try {
+        return { ...(await this.#call(model, prompt)), modelId: model };
+      } catch (err) {
+        const retryable = err instanceof ModelUnavailableError && (err.reason === "unavailable" || err.reason === "rate_limited");
+        if (!retryable || i === models.length - 1) throw err;
+      }
+    }
+    throw new ModelUnavailableError("unavailable", "No Gemini model is configured.");
+  }
+
+  async #call(model: string, prompt: { system: string; user: string }) {
     let response: Response;
     try {
       response = await this.#fetch(ENDPOINT, {
         method: "POST",
         headers: { "content-type": "application/json", "x-goog-api-key": this.#apiKey },
         body: JSON.stringify({
-          model: this.modelId,
+          model,
           system_instruction: prompt.system,
           input: prompt.user,
           store: false,
