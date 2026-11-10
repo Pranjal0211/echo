@@ -7,7 +7,7 @@ Each question resolves one item in `ROAST.md`. Answers are recorded here and app
 |---|---|---|---|---|---|
 | 1 | R1 | Should Milestone 1 also reply to a message you paste in, so Echo replaces the copy-into-ChatGPT step from the start? | Yes: option (b) | Use recommendation | Built in Milestone 0 |
 | 2 | R2 | Add *waiting on me* status + age badge + oldest-first sort in Milestone 1? | Yes | Use recommendation | Built in Milestone 0 |
-| 3 | R3 | Default drafting model: free Workers AI, or a strong hosted model (Claude) with a monthly cap? What cap? | Claude, $10/month cap to start | Use recommendation | Accepted; Milestone 0 uses the fake model. Needs the owner's API key |
+| 3 | R3 | Default drafting model: free Workers AI, or a strong hosted model (Claude) with a monthly cap? What cap? | Claude, $10/month cap to start | Use recommendation; changed 2026-11-10 to Gemini free tier | Superseded by ADR-019 (Gemini free tier). Needs the owner's Gemini API key |
 | 4 | R4 | Use your style notes + 5–10 real sent messages in prompts from Milestone 1? Can you collect them? | Yes | Use recommendation | Accepted; prompt includes style notes and examples. Owner still to collect real examples |
 | 5 | R5 | Adopt the four targets (0 over 48h, <24h median, <60s to draft, 70% light edits)? | Yes | Use recommendation | In PRD §2.4 |
 | 6 | R6 | Apply the mockup fixes when building the UI? | Yes | Use recommendation | Built in Milestone 0 |
