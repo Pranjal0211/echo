@@ -6,7 +6,7 @@ ADR-001 to ADR-008 come from the original ChatGPT PRD (§17) and were accepted b
 | ID | Decision | Why | Revisit when | Status |
 |---|---|---|---|---|
 | ADR-001 | Gmail before automated LinkedIn | Gmail has supported messaging APIs; LinkedIn direct DMs are restricted | Formal LinkedIn partner access | Accepted |
-| ADR-002 | Outbound Gmail before inbox import | Faster job-search value with a narrower OAuth scope | After outbound works — see ROAST R1 | Accepted, under review |
+| ADR-002 | Outbound Gmail before inbox import | Faster job-search value with a narrower OAuth scope | After outbound works | Accepted; pasted inbound replies come first (ROAST R1) |
 | ADR-003 | Human approval before every send | Prevents unwanted or mistaken messages | After evals and explicit opt-in | Accepted |
 | ADR-004 | Supabase Postgres + pgvector | One store for relational data, memory and search | Data or scale outgrows the free tier | Accepted |
 | ADR-005 | TypeScript Cloudflare Workers backend | Free hosting that fits a TypeScript/React skill set | Long-running or Python-specific needs | Accepted |
@@ -17,7 +17,12 @@ ADR-001 to ADR-008 come from the original ChatGPT PRD (§17) and were accepted b
 | ADR-010 | Messages come in by paste (and Gmail sync later); no screenshot capture | Owner's choice: copy-paste is enough | — | Accepted |
 | ADR-011 | LinkedIn support is optional: copy-paste assist only | LinkedIn developer access doesn't allow sending replies | Official messaging access exists | Accepted |
 | ADR-012 | Repo keeps ChatGPT's kit as its first commit; `docs/` is the source of truth | History shows how the plan evolved; one place to read | — | Accepted |
-| ADR-013 | Default drafting model | See ROAST R3 | — | Open |
+| ADR-013 | Default drafting model: a strong hosted model (Claude) behind the adapter, hard $10/month cap; Workers AI stays an option | Draft quality is the product; must beat the ChatGPT ritual (ROAST R3) | Eval set exists (Milestone 4) | Accepted 2026-11-09, not built yet (Milestone 0 uses the fake model) |
+| ADR-014 | npm workspaces, TypeScript packages consumed as source (no per-package build) | No extra tooling to install; Vite, Wrangler and Vitest all compile TS directly | Build times or publishing needs grow | Proposed: builder's call, in use since 2026-11-09 |
+| ADR-015 | Hono for routing inside the Worker | Small, Workers-native, typed, easy to test with `app.request()` | — | Proposed: builder's call, in use since 2026-11-09 |
+| ADR-016 | Milestone 0 stores data in memory behind an `EchoStore` interface; Supabase arrives in Milestone 1 | A working vertical slice before schema work (ROAST R8); routes won't change | Milestone 1 | Proposed: builder's call, in use since 2026-11-09 |
+| ADR-017 | Tailwind v4 tokens + small hand-written shadcn-style primitives | Two components didn't justify the shadcn CLI setup | Component count grows | Proposed: builder's call, in use since 2026-11-09 |
+| ADR-018 | A draft containing `[placeholders]` can't be copied or sent | Placeholders mark decisions only the owner can make (availability, salary…) | — | Proposed: builder's call, in use since 2026-11-09 |
 
 ## How to add one
 

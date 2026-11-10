@@ -53,13 +53,13 @@ LinkedIn has no box on purpose: LinkedIn messages enter as pasted text and leave
 | Component | Lives in | Responsibility |
 |---|---|---|
 | Web app | `apps/web` | Inbox, approvals, Outreach Studio, jobs, contacts, knowledge base, digest, settings |
-| API | `workers/api` | Auth check, request validation, routing, rate limits |
+| API | `workers/api` | Hono routes, request validation, error mapping; auth and rate limits arrive with Supabase (Milestone 1) |
 | Contracts | `packages/contracts` | Zod schemas shared by web and API (single source of request/response types) |
 | Core | `packages/core` | Domain rules: draft versions, approval state, CRM records |
 | Policy engine | `packages/core` | Decides whether an action is allowed; the model never decides this |
 | LLM adapter | `packages/ai` | Builds prompts, calls the model, parses and validates structured output; swappable provider |
 | Connectors | `packages/connectors` | Gmail now; any future provider behind the same message interface |
-| Database | `supabase/migrations` | Source of truth for drafts, approvals and send status |
+| Storage | `workers/api/src/store.ts` now, `supabase/migrations` from Milestone 1 | `EchoStore` interface; in-memory synthetic data in Milestone 0, Postgres later. Source of truth for drafts and send status |
 
 ## Flow 1 — Draft a reply (Milestone 1, pasted message)
 

@@ -8,7 +8,13 @@
 - Work tickets: `docs/tasks/` · Concept mockups: `docs/assets/` (visual direction only; see ROAST R6 for what not to copy)
 
 ## Status
-**Planning.** No product code until the owner says to start implementation.
+**Milestone 0 first slice is built**: paste → draft → edit → copy → mark sent, on synthetic in-memory data and the fake model.
+Next (Milestone 1): Supabase storage and auth, Knowledge Base screen, Outreach Studio, and a real model adapter (ADR-013, needs the owner's API key).
+
+## Commands
+- `npm run dev`: API (wrangler, :8787) + web (Vite, :5173)
+- `npm test` · `npm run typecheck` · `npm run build`: run across all workspaces
+- CI (`.github/workflows/ci.yml`) runs typecheck, test and build on every PR; keep it green before asking for a merge
 
 ## Working with the owner
 - Explain the plan in plain words and ask (with a recommendation) before building something new.

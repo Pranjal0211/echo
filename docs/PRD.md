@@ -1,7 +1,7 @@
 # ECHO — AI Communication Twin
 
 **Product Requirements Document (PRD) + implementation blueprint**  
-**Version:** 1.1  
+**Version:** 1.2  
 **Date:** 2026-11-08  
 **Status:** Accepted baseline. Open review items are tracked in `docs/ROAST.md` and resolved one at a time via `docs/GRILL.md`.  
 **Owner:** Pranjal Sharma  
@@ -17,6 +17,12 @@
 - Input is pasted text (and Gmail sync later). No screenshot capture.
 - LinkedIn support is optional: copy-paste assist only, because LinkedIn's developer access doesn't allow sending replies.
 - Stack, architecture, milestones and guardrails are unchanged from v1.0.
+
+### Changes in v1.2 (2026-11-09, owner accepted the review recommendations in `GRILL.md`)
+- Milestone 0 ends with one working paste → draft → copy path on a fake model (R8).
+- Milestone 1 also replies to pasted messages and tracks who is waiting on whom (R1, R2), and uses style notes and examples in prompts from day one (R4).
+- Success metrics gain concrete targets (R5). FR-06 is labelled Milestone 2 (R7).
+- Copying is blocked while a draft still contains `[placeholders]` for the owner's decisions.
 
 ## 1. Executive summary
 
@@ -71,6 +77,10 @@ Composing professional messages can consume disproportionate time and emotional 
 
 | Metric | Definition | Initial target / policy |
 |---|---|---|
+| Reply debt | Threads waiting on me for more than 48h | **0 on most days** |
+| Reply time | Median time to reply to a recruiter or referral message | **Under 24h** |
+| Time to draft | Opening a message to having a reply ready | **Under 60 seconds** |
+| Light-edit rate | Drafts sent with only light edits | **70% or more** |
 | Draft acceptance rate | Approved drafts / generated drafts | Collect baseline; improve by iteration |
 | Edit effort | Amount of change from AI draft to approved draft | Track; no fabricated benchmark |
 | Factual accuracy | Checked grounded claims / checked factual claims | No known false professional claims |
@@ -167,7 +177,7 @@ The interface should feel like an AI inbox + lightweight job-search CRM: calm, c
 | FR-03 | JD and contact intake | P0 | Paste text, job URL metadata and verified recipient fields |
 | FR-04 | AI reply and outreach generation | P0 | Editable grounded drafts; no automatic sending |
 | FR-05 | Manual LinkedIn assistant | P0 | Copy message, open LinkedIn, mark manually sent |
-| FR-06 | Gmail sending | P0 | Explicit approval; correct recipient and attachments; provider confirmation |
+| FR-06 | Gmail sending | P0 — Milestone 2 | Explicit approval; correct recipient and attachments; provider confirmation |
 | FR-07 | Contact and job tracking | P0 | Save jobs, recipients, statuses and follow-up dates |
 | FR-08 | Action audit log | P0 | Track user decision, draft version and send outcome |
 | FR-09 | Gmail inbox/thread reading | P1 | Authorized thread retrieval and contextual replies |
@@ -517,9 +527,9 @@ Initial design: store message metadata and only relevant content; limit history 
 
 ## 12. Implementation roadmap and exit criteria
 
-**Milestone 0 — Product foundation:** Finalize design system, source-of-truth PRD, repo layout, architecture decisions, DB schema, authentication choice, and API contracts. **Exit:** reviewed clickable wireframes or UI pages using synthetic data and an approved architecture decision record.
+**Milestone 0 — Product foundation:** Finalize design system, source-of-truth PRD, repo layout, architecture decisions, DB schema, authentication choice, and API contracts. **Exit:** reviewed clickable wireframes or UI pages using synthetic data and an approved architecture decision record, plus one working paste → draft → copy path on a fake model and synthetic data. Packages and tables are added only when a feature needs them.
 
-**Milestone 1 — Knowledge Base + Outreach Studio (first useful MVP):** Upload/manage resume, structured professional facts, jobs, contacts; generate personalized referral/recruiter drafts; edit/copy; track manual LinkedIn sends. **Exit:** user can paste a JD and produce a relevant, honest draft in their own style.
+**Milestone 1 — Knowledge Base + Outreach Studio (first useful MVP):** Upload/manage resume, structured professional facts, jobs, contacts; generate personalized referral/recruiter drafts; reply to pasted Gmail/LinkedIn messages; track who is waiting on whom, with age badges; use style notes and approved examples in prompts; edit/copy; track manual LinkedIn sends. **Exit:** user can paste a JD and produce a relevant, honest draft in their own style.
 
 **Milestone 2 — Gmail outbound:** OAuth `gmail.send`, new email compose, attachments, approval flow, durable outbox, idempotent delivery, send confirmation and tests. **Exit:** a verified recruiter email can be approved in Echo and sent correctly through Gmail, with the right resume.
 
