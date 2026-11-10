@@ -1,4 +1,4 @@
-import { type DraftModel, FakeDraftModel, GEMINI_DEFAULT_FALLBACK, GeminiDraftModel, ModelUnavailableError } from "@echo/ai";
+import { type DraftModel, type FactSuggester, FakeDraftModel, GEMINI_DEFAULT_FALLBACK, GeminiDraftModel, ModelUnavailableError } from "@echo/ai";
 
 /** Worker bindings that choose the drafting model. Secrets live in `.dev.vars` locally. */
 export interface ModelEnv {
@@ -9,10 +9,16 @@ export interface ModelEnv {
 }
 
 /** Fails every draft with setup guidance, so a missing key shows up in the UI, not a crash. */
-class MissingKeyModel implements DraftModel {
+class MissingKeyModel implements DraftModel, FactSuggester {
   readonly modelId = "gemini-not-configured";
   async generateDraft(): Promise<never> {
-    throw new ModelUnavailableError(
+    throw MissingKeyModel.#error();
+  }
+  async suggestFacts(): Promise<never> {
+    throw MissingKeyModel.#error();
+  }
+  static #error() {
+    return new ModelUnavailableError(
       "not_configured",
       "ECHO_MODEL is gemini but GEMINI_API_KEY is not set. Add it to workers/api/.dev.vars and restart the API.",
     );
@@ -20,7 +26,7 @@ class MissingKeyModel implements DraftModel {
 }
 
 /** `ECHO_MODEL=gemini` uses Gemini (ADR-019); anything else uses the deterministic fake model. */
-export function createModel(env: ModelEnv): DraftModel {
+export function createModel(env: ModelEnv): DraftModel & FactSuggester {
   if (env.ECHO_MODEL !== "gemini") return new FakeDraftModel();
   const apiKey = env.GEMINI_API_KEY?.trim();
   if (!apiKey) return new MissingKeyModel();
