@@ -1,6 +1,6 @@
-import type { ModelDraftOutput } from "@echo/contracts";
+import type { ModelDraftOutput, SuggestedFact } from "@echo/contracts";
 import { detectDecisionsNeeded } from "./decisions.ts";
-import type { DraftContext, DraftModel } from "./model.ts";
+import type { DraftContext, DraftModel, FactSuggester } from "./model.ts";
 
 const GREETING = { friendly_professional: "Hi", warm: "Hi", formal: "Dear", casual: "Hey" } as const;
 const SIGN_OFF = { friendly_professional: "Best", warm: "Thanks so much", formal: "Best regards", casual: "Cheers" } as const;
@@ -27,7 +27,7 @@ const PLACEHOLDER: Record<string, string> = {
  * Deterministic stand-in for a real model: same input, same draft. Used in local
  * development and tests so nothing needs an API key or network.
  */
-export class FakeDraftModel implements DraftModel {
+export class FakeDraftModel implements DraftModel, FactSuggester {
   readonly modelId = "fake-draft-model-v1";
 
   async generateDraft(ctx: DraftContext): Promise<ModelDraftOutput> {
@@ -58,4 +58,20 @@ export class FakeDraftModel implements DraftModel {
 
     return { subject, body, factIdsUsed, warnings: [], decisionsNeeded };
   }
+
+  /** Each bullet line (-, *, •) becomes one fact; the category comes from simple keywords. */
+  async suggestFacts(resumeText: string): Promise<SuggestedFact[]> {
+    return resumeText
+      .split("\n")
+      .map((line) => line.match(/^\s*[-*•]\s+(.+)$/)?.[1]?.trim())
+      .filter((text): text is string => Boolean(text))
+      .map((text) => ({ text, category: fakeCategory(text), sensitivity: "normal" as const }));
+  }
+}
+
+function fakeCategory(text: string): SuggestedFact["category"] {
+  if (/\b(degree|university|college|b\.?s|m\.?s|bachelor|master)\b/i.test(text)) return "education";
+  if (/\b(built|led|shipped|launched|designed|migrat\w*)\b/i.test(text)) return "project";
+  if (/\b(years?|engineer|developer|manager|at)\b/i.test(text)) return "experience";
+  return "skill";
 }
