@@ -1,6 +1,6 @@
-# Task 02 — Web UX (Claude Code)
+# Task 02 — Web UX
 
-**Milestone:** 0–1. **Owned path:** `apps/web`.
+**Milestone:** 0–1. **Builder:** Claude Code. **Path:** `apps/web`.
 
 ## Deliverables
 1. Responsive Echo shell/sidebar/header with accessible navigation.

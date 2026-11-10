@@ -1,6 +1,6 @@
 # Task 03 — Gmail outbound (after tasks 01–02 merge)
 
-**Milestone:** 2. **Owner:** Assign to one backend integrator only.
+**Milestone:** 2. **Builder:** Claude Code; the owner approves OAuth setup and enabling real sends.
 
 ## Deliverables
 1. Google OAuth `gmail.send` only at first; secure state/PKCE where appropriate and encrypted refresh token storage.
