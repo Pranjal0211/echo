@@ -17,7 +17,10 @@ export function App() {
       <main className="flex min-w-0 flex-1 flex-col">
         {screen === "inbox" ? (
           <InboxScreen
-            items={inbox.items} loading={inbox.loading} error={inbox.error} now={now}
+            items={inbox.items}
+            loading={inbox.loading}
+            error={inbox.error}
+            now={now}
             onChanged={inbox.reload}
             facts={profile?.facts ?? []}
           />
