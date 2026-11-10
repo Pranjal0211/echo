@@ -1,4 +1,4 @@
-import type { InboxItem } from "@echo/contracts";
+import type { InboxItem, Profile } from "@echo/contracts";
 import { useCallback, useEffect, useState } from "react";
 import { api } from "./api.ts";
 
@@ -34,4 +34,15 @@ export function useInbox() {
   }, [reload]);
 
   return { items, loading, error, reload };
+}
+
+export function useProfile(): Profile | null {
+  const [profile, setProfile] = useState<Profile | null>(null);
+  useEffect(() => {
+    api
+      .profile()
+      .then(({ profile }) => setProfile(profile))
+      .catch(() => setProfile(null));
+  }, []);
+  return profile;
 }
