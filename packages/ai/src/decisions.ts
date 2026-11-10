@@ -28,3 +28,13 @@ const RULES: ReadonlyArray<{ pattern: RegExp; question: string }> = [
 export function detectDecisionsNeeded(text: string): string[] {
   return RULES.filter((rule) => rule.pattern.test(text)).map((rule) => rule.question);
 }
+
+/**
+ * Safety-net questions for topics the model didn't already raise, so the owner
+ * sees each topic once: "What are your salary expectations?" covers salary.
+ */
+export function missingDecisions(text: string, alreadyAsked: readonly string[]): string[] {
+  return RULES.filter(
+    (rule) => rule.pattern.test(text) && !alreadyAsked.some((question) => rule.pattern.test(question)),
+  ).map((rule) => rule.question);
+}
