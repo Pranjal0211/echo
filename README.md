@@ -1,5 +1,7 @@
 # Echo — AI Communication Twin
 
+[![CI](https://github.com/Pranjal0211/echo/actions/workflows/ci.yml/badge.svg)](https://github.com/Pranjal0211/echo/actions/workflows/ci.yml)
+
 A private assistant for my job search. Recruiter, referral and hiring messages from **Gmail** and **LinkedIn** land in one dashboard with a reply already drafted, in my voice and only saying true things about me. I edit if needed, approve, and send. No more copying every message into ChatGPT, and no more leaving people hanging.
 
 > **Status: Milestone 0 working.** Paste a message → get a draft in your voice → edit → copy, with a "waiting on you" inbox. Runs locally on synthetic data and a deterministic fake model; no real accounts, keys or sends yet.
@@ -117,6 +119,8 @@ npm test           # 74 tests across contracts, core, ai, api and web
 npm run typecheck
 npm run build
 ```
+
+The same three checks run on GitHub for every pull request ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)), with no secrets.
 
 | Package | What's in it |
 |---|---|
