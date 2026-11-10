@@ -1,6 +1,6 @@
 import type { Draft, InboxItem, Length, ProfileFact, ReplyIntent, Tone } from "@echo/contracts";
 import { AlertTriangle, Check, Copy, HelpCircle, RefreshCw, Send, Sparkles } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { api } from "../api.ts";
 import { cn } from "../lib.ts";
 import { Badge } from "./ui/badge.tsx";
@@ -53,6 +53,8 @@ export function ReplyPanel({
   const [text, setText] = useState(item.latestDraft?.body ?? "");
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [manualCopy, setManualCopy] = useState(false);
+  const textRef = useRef<HTMLTextAreaElement>(null);
 
   const dirty = draft !== null && text.trim() !== draft.body;
   const isLinkedIn = draft?.deliveryCapability === "copy_only";
@@ -97,21 +99,32 @@ export function ReplyPanel({
       await onChanged();
     });
 
-  async function writeClipboard(value: string) {
+  /** Returns false when the browser blocks clipboard access; the text is then selected for ⌘C. */
+  async function writeClipboard(value: string): Promise<boolean> {
     try {
       await navigator.clipboard.writeText(value);
+      return true;
     } catch {
-      throw new Error("Couldn't copy automatically. Select the text and copy it manually.");
+      textRef.current?.focus();
+      textRef.current?.select();
+      return false;
     }
   }
+
+  const recordCopy = async (current: Draft) => {
+    show((await api.copyDraft(current.id, current.version)).draft);
+    setManualCopy(false);
+    await onChanged();
+  };
 
   const copyForLinkedIn = () =>
     run("copy", async () => {
       const current = await saved();
-      await writeClipboard(current.body);
-      show((await api.copyDraft(current.id, current.version)).draft);
-      await onChanged();
+      if (await writeClipboard(current.body)) await recordCopy(current);
+      else setManualCopy(true);
     });
+
+  const confirmManualCopy = () => run("copy", async () => recordCopy(await saved()));
 
   const markSent = () =>
     run("sent", async () => {
@@ -120,7 +133,10 @@ export function ReplyPanel({
       await onChanged();
     });
 
-  const copyText = () => run("copy", async () => writeClipboard((await saved()).body));
+  const copyText = () =>
+    run("copy", async () => {
+      if (!(await writeClipboard((await saved()).body))) setManualCopy(true);
+    });
 
   const factsUsed = draft ? facts.filter((f) => draft.factIdsUsed.includes(f.id)) : [];
 
@@ -216,6 +232,7 @@ export function ReplyPanel({
           <textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
+            ref={textRef}
             readOnly={finished}
             rows={9}
             aria-label="Draft text"
@@ -240,15 +257,27 @@ export function ReplyPanel({
               {error}
             </p>
           )}
+          {manualCopy && !finished && (
+            <p role="status" className="rounded-xl bg-brand-soft p-3 text-sm text-brand-ink">
+              Your browser blocked automatic copying. The text is selected: press ⌘C (or Ctrl+C)
+              {isLinkedIn ? ', then click "I copied it".' : "."}
+            </p>
+          )}
 
           {finished ? (
             <p className="text-sm text-muted">You sent this yourself. The thread is now waiting on {contact.name}.</p>
           ) : isLinkedIn ? (
             <div className="flex flex-wrap items-center gap-2">
               {dirty && <span className="text-xs text-muted">Unsaved edits are saved when you copy.</span>}
-              <Button variant="send" onClick={copyForLinkedIn} disabled={busy !== null}>
-                <Copy className="size-4" aria-hidden /> {busy === "copy" ? "Copying…" : "Copy for LinkedIn"}
-              </Button>
+              {manualCopy ? (
+                <Button variant="send" onClick={confirmManualCopy} disabled={busy !== null}>
+                  <Check className="size-4" aria-hidden /> I copied it
+                </Button>
+              ) : (
+                <Button variant="send" onClick={copyForLinkedIn} disabled={busy !== null}>
+                  <Copy className="size-4" aria-hidden /> {busy === "copy" ? "Copying…" : "Copy for LinkedIn"}
+                </Button>
+              )}
               <Button onClick={markSent} disabled={busy !== null || draft.status !== "copied" || dirty}>
                 <Check className="size-4" aria-hidden /> Mark as sent manually
               </Button>
