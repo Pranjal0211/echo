@@ -1,4 +1,6 @@
-# Copy to .dev.vars (git-ignored) and restart `npm run dev` to draft with Gemini.
+# Copy to .dev.vars (git-ignored) and restart `npm run dev`.
+
+# --- Real drafts with Gemini ---
 # Get a free key at https://aistudio.google.com/apikey
 # Free tier: Google may use prompts to improve its products and humans may read them.
 ECHO_MODEL=gemini
@@ -6,3 +8,10 @@ GEMINI_API_KEY=
 # Optional: defaults to gemini-3.8-flash, falling back to gemini-3.5-flash-lite when busy
 # GEMINI_MODEL=gemini-3.8-flash
 # GEMINI_FALLBACK_MODEL=gemini-3.5-flash-lite
+
+# --- Keep your data in the local Supabase (ADR-020) ---
+# `npm run db:start` then `npm run db:env` fills these in for you. The secret key can
+# read and write everything: keep it in this file only, never in the web app.
+# ECHO_STORE=supabase
+# SUPABASE_URL=http://127.0.0.1:54321
+# SUPABASE_SECRET_KEY=

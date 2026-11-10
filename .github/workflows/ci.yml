@@ -2,6 +2,7 @@ name: CI
 
 # Runs on every pull request (whatever branch it targets) and on pushes to main.
 # Uses only the fake model and synthetic data: no secrets, no network calls to Gmail or a model provider.
+# The database job runs a throwaway local Supabase in Docker; its keys are local-only defaults.
 on:
   pull_request:
   push:
@@ -38,3 +39,29 @@ jobs:
 
       - name: Build
         run: npm run build
+
+  database:
+    name: Database tests (local Supabase)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      # Starts Postgres, the REST API and Auth in Docker, then applies supabase/migrations.
+      - name: Start Supabase
+        run: npm run db:start
+
+      - name: Store contract against Postgres
+        run: npm run test:db
+
+      - name: Stop Supabase
+        if: always()
+        run: npm run db:stop
