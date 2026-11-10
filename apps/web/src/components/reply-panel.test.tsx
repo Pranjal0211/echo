@@ -60,6 +60,20 @@ describe("ReplyPanel", () => {
     expect(screen.getByRole("alert")).toHaveTextContent("Gemini's free-tier limit was reached.");
   });
 
+  it("names the model that wrote the draft", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => respond(makeDraft({ modelId: "gemini-3.8-flash" }))));
+    render(<ReplyPanel item={makeItem("linkedin")} facts={facts} onChanged={async () => {}} />);
+    await userEvent.click(screen.getByRole("button", { name: /Draft a reply/ }));
+    expect(screen.getByText("Drafted by gemini-3.8-flash")).toBeInTheDocument();
+  });
+
+  it("calls out drafts from the fake model", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => respond(makeDraft({ modelId: "fake-draft-model-v1" }))));
+    render(<ReplyPanel item={makeItem("linkedin")} facts={facts} onChanged={async () => {}} />);
+    await userEvent.click(screen.getByRole("button", { name: /Draft a reply/ }));
+    expect(screen.getByText("Drafted by the fake model (test mode)")).toBeInTheDocument();
+  });
+
   it("drafts a reply and shows decisions and facts used", async () => {
     vi.stubGlobal("fetch", vi.fn(async () => respond(makeDraft())));
     render(<ReplyPanel item={makeItem("linkedin")} facts={facts} onChanged={async () => {}} />);
