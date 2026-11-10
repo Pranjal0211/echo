@@ -9,7 +9,8 @@
 
 ## Status
 **Milestone 0 first slice is built**: paste → draft → edit → copy → mark sent, on synthetic in-memory data and the fake model.
-Next (Milestone 1): Supabase storage and auth, Knowledge Base screen, Outreach Studio, and a real model adapter (ADR-013, needs the owner's API key).
+Real drafts: Gemini adapter (ADR-019), on when `workers/api/.dev.vars` sets `ECHO_MODEL=gemini` and the owner's `GEMINI_API_KEY`. Tests always use the fake model and never call Gemini.
+Next (Milestone 1): Supabase storage and auth, Knowledge Base screen, Outreach Studio.
 
 ## Commands
 - `npm run dev`: API (wrangler, :8787) + web (Vite, :5173)

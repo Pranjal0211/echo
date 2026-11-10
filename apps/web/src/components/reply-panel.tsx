@@ -26,6 +26,11 @@ const LENGTHS: ReadonlyArray<[Length, string]> = [
   ["long", "Long"],
 ];
 
+/** Friendly model name: the fake model is called out so nobody mistakes it for real AI. */
+function modelLabel(modelId: string): string {
+  return modelId.startsWith("fake") ? "the fake model (test mode)" : modelId;
+}
+
 const STATUS_LABEL: Partial<Record<Draft["status"], string>> = {
   generated: "Generated",
   edited: "Edited",
@@ -150,6 +155,7 @@ export function ReplyPanel({
         <h3 className="font-semibold">Your reply</h3>
         {draft && STATUS_LABEL[draft.status] && <Badge tone="send">{STATUS_LABEL[draft.status]}</Badge>}
         {draft && <span className="text-xs text-muted">v{draft.version}</span>}
+        {draft && <span className="ml-auto text-xs text-muted">Drafted by {modelLabel(draft.modelId)}</span>}
       </div>
 
       {!finished && (
@@ -211,6 +217,12 @@ export function ReplyPanel({
         </div>
       )}
 
+      {error && (
+        <p role="alert" className="rounded-xl bg-danger-soft p-3 text-sm text-danger">
+          {error}
+        </p>
+      )}
+
       {draft && (
         <>
           {draft.decisionsNeeded.length > 0 && !finished && (
@@ -255,11 +267,6 @@ export function ReplyPanel({
             </div>
           )}
 
-          {error && (
-            <p role="alert" className="text-sm text-danger">
-              {error}
-            </p>
-          )}
           {blocked && !finished && (
             <p className="rounded-xl bg-warn-soft p-3 text-sm text-warn">
               Fill in {placeholders.join(", ")} before copying.

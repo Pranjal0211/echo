@@ -38,3 +38,13 @@ describe("parseModelOutput", () => {
     expect(() => parseModelOutput(JSON.stringify({ body: "Hi" }))).toThrowError(ModelOutputError);
   });
 });
+
+describe("buildDraftPrompt formatting rules", () => {
+  it("keeps fact ids out of the body and asks for named placeholders and paragraphs", () => {
+    const { system } = buildDraftPrompt(makeContext());
+    expect(system).toMatch(/Never write fact ids/);
+    expect(system).toMatch(/\[your salary range\]/);
+    expect(system).toMatch(/never a bare \[placeholder\]/);
+    expect(system).toMatch(/short paragraphs separated by blank lines/);
+  });
+});

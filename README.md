@@ -4,7 +4,7 @@
 
 A private assistant for my job search. Recruiter, referral and hiring messages from **Gmail** and **LinkedIn** land in one dashboard with a reply already drafted, in my voice and only saying true things about me. I edit if needed, approve, and send. No more copying every message into ChatGPT, and no more leaving people hanging.
 
-> **Status: Milestone 0 working.** Paste a message → get a draft in your voice → edit → copy, with a "waiting on you" inbox. Runs locally on synthetic data and a deterministic fake model; no real accounts, keys or sends yet.
+> **Status: Milestone 0 working, with real AI drafts.** Paste a message → get a draft in your voice → edit → copy, with a "waiting on you" inbox. Runs locally on synthetic data; drafts come from Google Gemini (free tier) with your key, or a deterministic fake model without one. No real sends yet.
 
 ![Echo inbox: threads sorted by how long they've waited, with a reply panel](docs/screenshots/inbox.jpg)
 
@@ -40,7 +40,7 @@ A private assistant for my job search. Recruiter, referral and hiring messages f
 flowchart LR
     UI["React + TypeScript<br/>Vite · Tailwind · shadcn/ui<br/>(Cloudflare Pages)"]
     API["Cloudflare Workers API<br/>contracts · policy · outbox"]
-    AI["LLM adapter<br/>(swappable provider)"]
+    AI["LLM adapter<br/>(Gemini; swappable)"]
     DB[("Supabase<br/>Postgres + pgvector<br/>Auth · Storage")]
     GMAIL["Gmail API"]
     LI["LinkedIn<br/>(paste in / copy out by me)"]
@@ -114,8 +114,18 @@ npm run dev        # API on http://localhost:8787, web app on http://localhost:5
 
 Open http://localhost:5173. Data is synthetic and resets when the API restarts.
 
+### Real AI drafts with Gemini (free)
+
+Without a key, drafts come from a deterministic fake model (the panel says "Drafted by the fake model"). To use Google Gemini:
+
+1. Create a free API key at [Google AI Studio](https://aistudio.google.com/apikey).
+2. Copy `workers/api/.dev.vars.example` to `workers/api/.dev.vars` (git-ignored) and paste the key after `GEMINI_API_KEY=`.
+3. Restart `npm run dev`. The reply panel now says "Drafted by gemini-3.8-flash", or "gemini-3.5-flash-lite" when 3.8 is busy and Echo falls back.
+
+On the free tier, Google may use what you send to improve its products, and human reviewers may read it ([ADR-019](docs/DECISIONS.md)). Tests never call Gemini.
+
 ```bash
-npm test           # 74 tests across contracts, core, ai, api and web
+npm test           # 94 tests across contracts, core, ai, api and web
 npm run typecheck
 npm run build
 ```
@@ -126,7 +136,7 @@ The same three checks run on GitHub for every pull request ([`.github/workflows/
 |---|---|
 | `packages/contracts` | Zod schemas shared by API and web: conversations, drafts, profile facts, requests, errors |
 | `packages/core` | Draft lifecycle (exact-version edits, LinkedIn copy-only), policy (verified facts, opt-outs, grounding), waiting-on-me ordering |
-| `packages/ai` | `DraftModel` adapter interface, prompt builder that treats messages as data, decision detector, deterministic fake model |
+| `packages/ai` | `DraftModel` adapter interface, Gemini adapter, prompt builder that treats messages as data, decision detector, deterministic fake model |
 | `workers/api` | Cloudflare Worker (Hono): inbox, paste, generate, edit, copy, mark-sent; synthetic seed in memory |
 | `apps/web` | React + Vite + Tailwind: inbox, paste form, reply panel |
 

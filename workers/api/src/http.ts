@@ -1,7 +1,7 @@
 import type { Context } from "hono";
 import type { ContentfulStatusCode } from "hono/utils/http-status";
 import type { ApiErrorCode } from "@echo/contracts";
-import { ModelOutputError } from "@echo/ai";
+import { ModelOutputError, ModelUnavailableError } from "@echo/ai";
 import { DomainError } from "@echo/core";
 import type { z } from "zod";
 
@@ -52,6 +52,10 @@ export function toErrorResponse(err: unknown, c: Context): Response {
   }
   if (err instanceof ModelOutputError) {
     return c.json({ error: { code: "model_error", message: "The model returned an unusable draft. Try again." } }, 502);
+  }
+  if (err instanceof ModelUnavailableError) {
+    const status = err.reason === "rate_limited" ? 429 : 503;
+    return c.json({ error: { code: "model_error", message: err.message } }, status);
   }
   console.error("Unhandled error", err instanceof Error ? err.name : typeof err);
   return c.json({ error: { code: "bad_request", message: "Something went wrong." } }, 500);
