@@ -1,10 +1,11 @@
-import { type DraftModel, FakeDraftModel, GeminiDraftModel, ModelUnavailableError } from "@echo/ai";
+import { type DraftModel, FakeDraftModel, GEMINI_DEFAULT_FALLBACK, GeminiDraftModel, ModelUnavailableError } from "@echo/ai";
 
 /** Worker bindings that choose the drafting model. Secrets live in `.dev.vars` locally. */
 export interface ModelEnv {
   ECHO_MODEL?: string;
   GEMINI_API_KEY?: string;
   GEMINI_MODEL?: string;
+  GEMINI_FALLBACK_MODEL?: string;
 }
 
 /** Fails every draft with setup guidance, so a missing key shows up in the UI, not a crash. */
@@ -23,5 +24,10 @@ export function createModel(env: ModelEnv): DraftModel {
   if (env.ECHO_MODEL !== "gemini") return new FakeDraftModel();
   const apiKey = env.GEMINI_API_KEY?.trim();
   if (!apiKey) return new MissingKeyModel();
-  return new GeminiDraftModel({ apiKey, model: env.GEMINI_MODEL?.trim() || undefined });
+  const fallback = env.GEMINI_FALLBACK_MODEL?.trim();
+  return new GeminiDraftModel({
+    apiKey,
+    model: env.GEMINI_MODEL?.trim() || undefined,
+    fallbackModels: fallback ? [fallback] : [GEMINI_DEFAULT_FALLBACK],
+  });
 }
