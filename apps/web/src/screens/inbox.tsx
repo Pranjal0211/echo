@@ -1,8 +1,9 @@
-import type { InboxItem } from "@echo/contracts";
+import type { InboxItem, ProfileFact } from "@echo/contracts";
 import { useState } from "react";
 import { ConversationView } from "../components/conversation-view.tsx";
 import { InboxList } from "../components/inbox-list.tsx";
 import { PasteMessageForm } from "../components/paste-message-form.tsx";
+import { ReplyPanel } from "../components/reply-panel.tsx";
 import { Button } from "../components/ui/button.tsx";
 import { ClipboardPaste } from "lucide-react";
 
@@ -12,7 +13,9 @@ export function InboxScreen({
   error,
   now,
   onChanged,
+  facts,
 }: {
+  facts: ProfileFact[];
   items: InboxItem[];
   loading: boolean;
   error: string | null;
@@ -64,7 +67,9 @@ export function InboxScreen({
         </div>
         <div className="rounded-2xl border border-line bg-surface p-4 md:p-6">
           {selected ? (
-            <ConversationView item={selected} now={now} />
+            <ConversationView item={selected} now={now}>
+              <ReplyPanel key={selected.conversation.id} item={selected} facts={facts} onChanged={onChanged} />
+            </ConversationView>
           ) : (
             <p className="text-sm text-muted">Select a conversation.</p>
           )}
