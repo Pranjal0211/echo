@@ -24,10 +24,14 @@ export interface DraftContext {
   facts: ProfileFact[];
 }
 
+/** Model output, plus which model wrote it when an adapter can fall back to another one. */
+export type ModelDraftResult = ModelDraftOutput & { modelId?: string };
+
 /** Provider adapter (ADR-007). Swap implementations without touching business logic. */
 export interface DraftModel {
+  /** The preferred model; a result's `modelId` wins when the adapter fell back. */
   readonly modelId: string;
-  generateDraft(context: DraftContext): Promise<ModelDraftOutput>;
+  generateDraft(context: DraftContext): Promise<ModelDraftResult>;
 }
 
 export class ModelOutputError extends Error {
