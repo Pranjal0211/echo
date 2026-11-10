@@ -36,7 +36,7 @@ export function buildDraftPrompt(ctx: DraftContext): DraftPrompt {
     "Respond with JSON only: {\"subject\": string|null, \"body\": string, \"factIdsUsed\": string[], \"warnings\": string[], \"decisionsNeeded\": string[]}",
   ].join("\n");
 
-  const facts = ctx.facts.map((f) => `  <fact id="${f.id}">${escapeData(f.text)}</fact>`).join("\n");
+  const facts = ctx.facts.map((f) => `  <fact id="${escapeData(f.id)}">${escapeData(f.text)}</fact>`).join("\n");
   const examples = ctx.profile.styleExamples
     .map((e) => `  <example situation="${escapeData(e.situation)}">${escapeData(e.text)}</example>`)
     .join("\n");
