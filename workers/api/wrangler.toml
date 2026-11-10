@@ -2,6 +2,8 @@ name = "echo-api"
 main = "src/index.ts"
 compatibility_date = "2026-11-01"
 
-# Milestone 0: in-memory synthetic data and the fake model. No secrets needed.
+# In-memory synthetic data. The fake model needs no secrets.
+# For real drafts, set ECHO_MODEL and GEMINI_API_KEY in .dev.vars (see .dev.vars.example).
 [vars]
 ECHO_MODEL = "fake"
+GEMINI_MODEL = "gemini-3.8-flash"
