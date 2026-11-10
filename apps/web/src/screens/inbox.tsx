@@ -2,12 +2,16 @@ import type { InboxItem } from "@echo/contracts";
 import { useState } from "react";
 import { ConversationView } from "../components/conversation-view.tsx";
 import { InboxList } from "../components/inbox-list.tsx";
+import { PasteMessageForm } from "../components/paste-message-form.tsx";
+import { Button } from "../components/ui/button.tsx";
+import { ClipboardPaste } from "lucide-react";
 
 export function InboxScreen({
   items,
   loading,
   error,
   now,
+  onChanged,
 }: {
   items: InboxItem[];
   loading: boolean;
@@ -16,6 +20,7 @@ export function InboxScreen({
   onChanged: () => Promise<void>;
 }) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [pasting, setPasting] = useState(false);
   const selected = items.find((i) => i.conversation.id === selectedId) ?? items[0] ?? null;
 
   return (
@@ -25,7 +30,23 @@ export function InboxScreen({
           <h1 className="text-2xl font-semibold">Inbox</h1>
           <p className="text-sm text-muted">Oldest first. Echo drafts; you decide and send.</p>
         </div>
+        {!pasting && (
+          <Button variant="primary" onClick={() => setPasting(true)}>
+            <ClipboardPaste className="size-4" aria-hidden /> Paste a message
+          </Button>
+        )}
       </header>
+
+      {pasting && (
+        <PasteMessageForm
+          onCancel={() => setPasting(false)}
+          onCreated={async (item) => {
+            setPasting(false);
+            await onChanged();
+            setSelectedId(item.conversation.id);
+          }}
+        />
+      )}
 
       {error && (
         <p role="alert" className="rounded-lg bg-danger-soft px-4 py-3 text-sm text-danger">
