@@ -3,6 +3,8 @@ import type { ContentfulStatusCode } from "hono/utils/http-status";
 import type { ApiErrorCode } from "@echo/contracts";
 import { ModelOutputError, ModelUnavailableError } from "@echo/ai";
 import { DomainError } from "@echo/core";
+import { StoreConfigError } from "./store-config.ts";
+import { MissingProfileError, StoreError } from "./supabase-store.ts";
 import type { z } from "zod";
 
 export class HttpError extends Error {
@@ -56,6 +58,13 @@ export function toErrorResponse(err: unknown, c: Context): Response {
   if (err instanceof ModelUnavailableError) {
     const status = err.reason === "rate_limited" ? 429 : 503;
     return c.json({ error: { code: "model_error", message: err.message } }, status);
+  }
+  if (err instanceof MissingProfileError || err instanceof StoreConfigError) {
+    return c.json({ error: { code: "storage_error", message: err.message } }, 503);
+  }
+  if (err instanceof StoreError) {
+    console.error("Store error", err.message);
+    return c.json({ error: { code: "storage_error", message: "Couldn't reach the database. Is Supabase running? Try `npm run db:start`." } }, 503);
   }
   console.error("Unhandled error", err instanceof Error ? err.name : typeof err);
   return c.json({ error: { code: "bad_request", message: "Something went wrong." } }, 500);
