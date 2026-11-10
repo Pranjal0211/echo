@@ -3,6 +3,8 @@
 A critical review of the ChatGPT-generated plan (round 2, after the owner's decisions on 2026-11-08).
 The plan, stack and guardrails stay. What's left is a list of improvements, worked through **one at a time** in `GRILL.md`.
 
+> **2026-11-09:** the owner accepted every recommendation below. `GRILL.md` tracks what is built and what is still to come.
+
 ## Settled
 
 | Item | Outcome |
