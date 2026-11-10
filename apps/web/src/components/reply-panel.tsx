@@ -57,6 +57,9 @@ export function ReplyPanel({
   const textRef = useRef<HTMLTextAreaElement>(null);
 
   const dirty = draft !== null && text.trim() !== draft.body;
+  /** Placeholders like [your availability] mean a decision is still open; don't let them go out. */
+  const placeholders = text.match(/\[[^\]\n]{1,60}\]/g) ?? [];
+  const blocked = placeholders.length > 0;
   const isLinkedIn = draft?.deliveryCapability === "copy_only";
   const finished = draft?.status === "sent_manually";
 
@@ -257,6 +260,11 @@ export function ReplyPanel({
               {error}
             </p>
           )}
+          {blocked && !finished && (
+            <p className="rounded-xl bg-warn-soft p-3 text-sm text-warn">
+              Fill in {placeholders.join(", ")} before copying.
+            </p>
+          )}
           {manualCopy && !finished && (
             <p role="status" className="rounded-xl bg-brand-soft p-3 text-sm text-brand-ink">
               Your browser blocked automatic copying. The text is selected: press ⌘C (or Ctrl+C)
@@ -270,11 +278,11 @@ export function ReplyPanel({
             <div className="flex flex-wrap items-center gap-2">
               {dirty && <span className="text-xs text-muted">Unsaved edits are saved when you copy.</span>}
               {manualCopy ? (
-                <Button variant="send" onClick={confirmManualCopy} disabled={busy !== null}>
+                <Button variant="send" onClick={confirmManualCopy} disabled={busy !== null || blocked}>
                   <Check className="size-4" aria-hidden /> I copied it
                 </Button>
               ) : (
-                <Button variant="send" onClick={copyForLinkedIn} disabled={busy !== null}>
+                <Button variant="send" onClick={copyForLinkedIn} disabled={busy !== null || blocked}>
                   <Copy className="size-4" aria-hidden /> {busy === "copy" ? "Copying…" : "Copy for LinkedIn"}
                 </Button>
               )}
@@ -289,7 +297,7 @@ export function ReplyPanel({
                 {contact.verifiedEmail ? ` <${contact.verifiedEmail}>` : " (no verified email yet)"}
               </p>
               <div className="flex flex-wrap items-center gap-2">
-                <Button onClick={copyText} disabled={busy !== null}>
+                <Button onClick={copyText} disabled={busy !== null || blocked}>
                   <Copy className="size-4" aria-hidden /> Copy text
                 </Button>
                 <Button variant="send" disabled title="Gmail sending arrives in Milestone 2">
