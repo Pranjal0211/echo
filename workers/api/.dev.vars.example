@@ -3,5 +3,6 @@
 # Free tier: Google may use prompts to improve its products and humans may read them.
 ECHO_MODEL=gemini
 GEMINI_API_KEY=
-# Optional; defaults to gemini-3.8-flash
-# GEMINI_MODEL=gemini-3.5-flash-lite
+# Optional: defaults to gemini-3.8-flash, falling back to gemini-3.5-flash-lite when busy
+# GEMINI_MODEL=gemini-3.8-flash
+# GEMINI_FALLBACK_MODEL=gemini-3.5-flash-lite
