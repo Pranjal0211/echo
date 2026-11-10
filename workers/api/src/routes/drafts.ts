@@ -56,7 +56,7 @@ export function draftRoutes({ store, model, now, newId }: AppDeps) {
         headline: profile.headline,
         styleNotes: profile.styleNotes,
         styleExamples: profile.styleExamples,
-      }
+      },
       facts,
     });
     const parsed = ModelDraftOutput.safeParse(raw);
