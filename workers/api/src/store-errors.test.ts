@@ -11,7 +11,7 @@ function appWithFailingStore(error: Error) {
   store.listConversations = async () => {
     throw error;
   };
-  return createApp({ store, model: new FakeDraftModel(), now: () => new Date(), newId: () => "id" });
+  return createApp({ store, model: new FakeDraftModel(), suggester: new FakeDraftModel(), now: () => new Date(), newId: () => "id" });
 }
 
 describe("storage errors", () => {

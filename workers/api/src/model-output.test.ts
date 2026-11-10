@@ -1,4 +1,4 @@
-import type { DraftModel } from "@echo/ai";
+import { type DraftModel, FakeDraftModel } from "@echo/ai";
 import { DraftResponse } from "@echo/contracts";
 import { describe, expect, it } from "vitest";
 import { createApp } from "./app.ts";
@@ -22,7 +22,7 @@ const messyModel: DraftModel = {
 };
 
 async function draftForPriya() {
-  const app = createApp({ store: new InMemoryStore(buildSeed(TEST_NOW)), model: messyModel, now: () => TEST_NOW, newId: () => "d1" });
+  const app = createApp({ store: new InMemoryStore(buildSeed(TEST_NOW)), model: messyModel, suggester: new FakeDraftModel(), now: () => TEST_NOW, newId: () => "d1" });
   const res = await app.request("/api/drafts/generate", {
     method: "POST",
     headers: { "content-type": "application/json" },

@@ -14,9 +14,11 @@ let app: ReturnType<typeof createApp> | null = null;
  * Unix epoch outside a request, which would date every seeded message to 1970.
  */
 function getApp(env: Env) {
+  const model = createModel(env);
   app ??= createApp({
     store: createStore(env, new Date()),
-    model: createModel(env),
+    model,
+    suggester: model,
     now: () => new Date(),
     newId: () => crypto.randomUUID(),
   });

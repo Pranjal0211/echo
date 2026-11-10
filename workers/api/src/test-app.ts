@@ -11,6 +11,7 @@ export function makeTestApp() {
   const app = createApp({
     store,
     model: new FakeDraftModel(),
+    suggester: new FakeDraftModel(),
     now: () => TEST_NOW,
     newId: () => `id-${++n}`,
   });

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { DraftModel } from "@echo/ai";
+import { type DraftModel, FakeDraftModel } from "@echo/ai";
 import { DraftResponse, InboxResponse } from "@echo/contracts";
 import { createApp } from "./app.ts";
 import { buildSeed } from "./seed.ts";
@@ -45,7 +45,7 @@ describe("POST /api/drafts/generate", () => {
         return { subject: null, body: "Hi", factIdsUsed: ["fact-rust", "fact-visa"], warnings: [], decisionsNeeded: [] };
       },
     };
-    const app = createApp({ store: new InMemoryStore(buildSeed(TEST_NOW)), model: spy, now: () => TEST_NOW, newId: () => "d" });
+    const app = createApp({ store: new InMemoryStore(buildSeed(TEST_NOW)), model: spy, suggester: new FakeDraftModel(), now: () => TEST_NOW, newId: () => "d" });
     const res = await app.request("/api/drafts/generate", {
       method: "POST",
       headers: { "content-type": "application/json" },
@@ -79,7 +79,7 @@ describe("POST /api/drafts/generate", () => {
         return { body: "" } as never;
       },
     };
-    const app = createApp({ store: new InMemoryStore(buildSeed(TEST_NOW)), model: broken, now: () => TEST_NOW, newId: () => "d" });
+    const app = createApp({ store: new InMemoryStore(buildSeed(TEST_NOW)), model: broken, suggester: new FakeDraftModel(), now: () => TEST_NOW, newId: () => "d" });
     const res = await app.request("/api/drafts/generate", {
       method: "POST",
       headers: { "content-type": "application/json" },
