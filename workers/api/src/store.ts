@@ -2,11 +2,13 @@ import type { Contact, Conversation, Draft, Profile } from "@echo/contracts";
 import type { SeedData } from "./seed.ts";
 
 /**
- * Storage port. Milestone 0 uses memory; Milestone 1 adds a Supabase implementation
- * behind the same interface, so routes don't change.
+ * Storage port. `InMemoryStore` serves tests and quick demos; `SupabaseStore` keeps data
+ * in Postgres (ADR-020). Routes only see this interface.
  */
 export interface EchoStore {
   getProfile(): Promise<Profile>;
+  /** Replace the profile with its facts and style examples. */
+  saveProfile(profile: Profile): Promise<void>;
   listConversations(): Promise<Conversation[]>;
   getConversation(id: string): Promise<Conversation | null>;
   saveConversation(conversation: Conversation): Promise<void>;
@@ -19,7 +21,7 @@ export interface EchoStore {
 
 /** Per-isolate memory. Resets when the dev server restarts; fine for synthetic data. */
 export class InMemoryStore implements EchoStore {
-  private readonly profile: Profile;
+  private profile: Profile;
   private readonly contacts = new Map<string, Contact>();
   private readonly conversations = new Map<string, Conversation>();
   private readonly drafts = new Map<string, Draft>();
@@ -32,6 +34,9 @@ export class InMemoryStore implements EchoStore {
 
   async getProfile() {
     return structuredClone(this.profile);
+  }
+  async saveProfile(profile: Profile) {
+    this.profile = structuredClone(profile);
   }
   async listConversations() {
     return [...this.conversations.values()].map((c) => structuredClone(c));
