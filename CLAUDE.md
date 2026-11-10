@@ -11,7 +11,8 @@
 **Milestone 0 first slice is built**: paste → draft → edit → copy → mark sent, on synthetic in-memory data and the fake model.
 Real drafts: Gemini adapter (ADR-019), on when `workers/api/.dev.vars` sets `ECHO_MODEL=gemini` and the owner's `GEMINI_API_KEY`. Tests always use the fake model and never call Gemini.
 Milestone 1 storage: `ECHO_STORE=supabase` keeps data in a local Supabase (ADR-020; `npm run db:start`, `db:env`, `db:seed`). Sign-in waits until deploy.
-Next (Milestone 1): Knowledge Base screen (paste resume → Gemini suggests facts → owner approves), Outreach Studio, Jobs/Contacts.
+Knowledge Base (FR-02, ADR-021): paste resume → model suggests facts (saved unverified) → owner approves; style notes and examples.
+Next (Milestone 1): Outreach Studio, then Jobs/Contacts.
 
 ## Commands
 - `npm run dev`: API (wrangler, :8787) + web (Vite, :5173)
