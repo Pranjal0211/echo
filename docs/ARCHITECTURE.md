@@ -27,7 +27,7 @@ flowchart TB
         STORE["Storage<br/>(resumes)"]
     end
 
-    MODEL["Model provider<br/>(Workers AI or other)"]
+    MODEL["Model provider<br/>(Gemini free tier; fake model in tests)"]
     GAPI["Gmail API"]
 
     UI -->|authenticated requests| API
@@ -138,7 +138,7 @@ Tables from PRD §8.4: `users`, `connected_accounts`, `contacts`, `jobs`, `appli
 
 | Environment | Model | Gmail | Data |
 |---|---|---|---|
-| Local | Fake model by default, real optional | Fake connector | Synthetic seed |
+| Local | Fake model by default; Gemini when `ECHO_MODEL=gemini` and `GEMINI_API_KEY` are in `workers/api/.dev.vars` | Fake connector | Synthetic seed |
 | Staging | Real model | Test Google account only | Synthetic + test recipients |
 | Personal production | Real model | My account, sends only after approval | Mine |
 

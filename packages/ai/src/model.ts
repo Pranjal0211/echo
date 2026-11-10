@@ -36,3 +36,17 @@ export class ModelOutputError extends Error {
     this.name = "ModelOutputError";
   }
 }
+
+/** Why a provider couldn't be reached or refused the call. */
+export type ModelUnavailableReason = "not_configured" | "auth" | "rate_limited" | "unavailable";
+
+/** The provider failed before returning a draft. Messages are safe to show the owner. */
+export class ModelUnavailableError extends Error {
+  constructor(
+    readonly reason: ModelUnavailableReason,
+    message: string,
+  ) {
+    super(message);
+    this.name = "ModelUnavailableError";
+  }
+}
