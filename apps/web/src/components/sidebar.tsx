@@ -33,7 +33,7 @@ export function Sidebar({
   waitingCount: number;
 }) {
   return (
-    <aside className="flex shrink-0 flex-col border-line bg-surface md:h-screen md:w-60 md:border-r">
+    <aside className="flex shrink-0 flex-col border-line bg-surface md:sticky md:top-0 md:h-screen md:w-60 md:border-r">
       <div className="flex items-center gap-2.5 px-5 py-4">
         <span className="grid size-9 place-items-center rounded-xl bg-brand text-white">
           <MessageSquareText className="size-5" aria-hidden />
