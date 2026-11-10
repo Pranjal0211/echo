@@ -74,6 +74,7 @@ export const ApiErrorCode = z.enum([
   "version_conflict",
   "policy_blocked",
   "model_error",
+  "storage_error",
 ]);
 export type ApiErrorCode = z.infer<typeof ApiErrorCode>;
 
