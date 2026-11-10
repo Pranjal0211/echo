@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
   CreateConversationRequest,
+  CreateFactRequest,
+  MAX_RESUME_CHARS,
+  SuggestFactsRequest,
+  UpdateFactRequest,
+  UpdateProfileRequest,
   Draft,
   GenerateDraftRequest,
   MAX_MESSAGE_CHARS,
@@ -113,5 +118,26 @@ describe("Draft", () => {
         deliveryCapability: "copy_only",
       }).success,
     ).toBe(false);
+  });
+});
+
+describe("Knowledge Base requests", () => {
+  it("rejects a profile or fact update that changes nothing", () => {
+    expect(UpdateProfileRequest.safeParse({}).success).toBe(false);
+    expect(UpdateFactRequest.safeParse({}).success).toBe(false);
+    expect(UpdateFactRequest.safeParse({ verified: true }).success).toBe(true);
+  });
+
+  it("defaults a new fact to normal sensitivity and trims it", () => {
+    expect(CreateFactRequest.parse({ text: "  Knows Go ", category: "skill" })).toEqual({
+      text: "Knows Go",
+      category: "skill",
+      sensitivity: "normal",
+    });
+  });
+
+  it("caps the pasted resume", () => {
+    expect(SuggestFactsRequest.safeParse({ resumeText: "a".repeat(MAX_RESUME_CHARS) }).success).toBe(true);
+    expect(SuggestFactsRequest.safeParse({ resumeText: "a".repeat(MAX_RESUME_CHARS + 1) }).success).toBe(false);
   });
 });
