@@ -1,0 +1,25 @@
+{
+  "name": "echo",
+  "private": true,
+  "description": "Echo — AI communication twin for job-search replies",
+  "license": "MIT",
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "workers/*",
+    "apps/*"
+  ],
+  "engines": {
+    "node": "^24.0.0"
+  },
+  "scripts": {
+    "dev": "npm run dev --workspace @echo/api & npm run dev --workspace @echo/web",
+    "test": "npm run test --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "build": "npm run build --workspaces --if-present"
+  },
+  "devDependencies": {
+    "typescript": "^7.0.2",
+    "vitest": "^5.1.0"
+  }
+}
