@@ -22,7 +22,7 @@ export function App() {
             error={inbox.error}
             now={now}
             onChanged={inbox.reload}
-            facts={profile?.facts ?? []}
+            facts={profile.profile?.facts ?? []}
           />
         ) : (
           <ComingSoon screen={screen} />
