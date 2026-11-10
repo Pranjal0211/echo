@@ -4,7 +4,7 @@
 
 A private assistant for my job search. Recruiter, referral and hiring messages from **Gmail** and **LinkedIn** land in one dashboard with a reply already drafted, in my voice and only saying true things about me. I edit if needed, approve, and send. No more copying every message into ChatGPT, and no more leaving people hanging.
 
-> **Status: Milestone 0 working, Milestone 1 started.** Paste a message → get a draft in your voice → edit → copy, with a "waiting on you" inbox. Drafts come from Google Gemini (free tier) with your key, or a deterministic fake model without one. Data can now live in a local Supabase (Postgres) instead of memory. No real sends yet.
+> **Status: Milestone 0 working, Milestone 1 in progress.** Paste a message → get a draft in your voice → edit → copy, with a "waiting on you" inbox, and a Knowledge Base that turns your resume into facts you approve. Drafts come from Google Gemini (free tier) with your key, or a deterministic fake model without one. Data can live in a local Supabase (Postgres). No real sends yet.
 
 ![Echo inbox: threads sorted by how long they've waited, with a reply panel](docs/screenshots/inbox.jpg)
 
@@ -18,6 +18,14 @@ A private assistant for my job search. Recruiter, referral and hiring messages f
 - **LinkedIn:** Copy for LinkedIn → Mark as sent manually, which moves the thread to *waiting on them*. There is no send button for LinkedIn.
 - **Gmail:** shows the recipient and subject; Approve & Send is visible but disabled until Milestone 2.
 - **Edits are versioned:** each edit is a new version, and stale edits are rejected.
+
+### Knowledge Base (Milestone 1)
+
+- **Paste your resume** and Gemini suggests short facts, one claim each. The resume text is used once and never saved.
+- **You approve every suggestion** before a draft can use it. Suggestions holding email addresses, phone numbers or links are dropped.
+- **Salary, visa and notice period** are always marked *ask every time*, so drafts leave them out unless you include them.
+- **Edit, re-categorise or delete** any fact, or type your own (yours start approved).
+- **Your voice:** style notes and real messages you've sent, which go into every draft prompt.
 
 ## What it does
 
@@ -59,7 +67,7 @@ The backend's policy layer (not the model) decides what's allowed. A send queue 
 | Milestone | Scope | Status |
 |---|---|---|
 | 0 — Foundation | Contracts, core rules, model adapter, Worker API, web app; one working paste → draft → copy path | ✅ First slice working |
-| 1 — Knowledge Base + Outreach Studio | Profile and resumes, JD/contact intake, drafting, edit/copy, LinkedIn manual sends, job CRM | 🚧 Postgres storage done; Knowledge Base next |
+| 1 — Knowledge Base + Outreach Studio | Profile and resumes, JD/contact intake, drafting, edit/copy, LinkedIn manual sends, job CRM | 🚧 Postgres storage and Knowledge Base done; Outreach Studio next |
 | 2 — Gmail outbound | OAuth `gmail.send`, approval, outbox, idempotent sending | — |
 | 3 — Gmail inbox | Read threads, classify, draft replies in-thread | — |
 | 4 — Personalization + RAG | Style learning from edits, embeddings, eval set | — |
@@ -137,7 +145,7 @@ npm run db:seed    # optional: the synthetic demo data
 Restart `npm run dev`; drafts, edits and sent replies now survive restarts. `npm run db:reset` wipes the database and reseeds it, and Supabase Studio at http://127.0.0.1:54323 shows the tables. Every table has row-level security, so only the API (holding the secret key) can read it.
 
 ```bash
-npm test           # 130 tests across contracts, core, ai, api and web
+npm test           # 164 tests across contracts, core, ai, api and web
 npm run test:db    # the store tests again, against the local Supabase
 npm run typecheck
 npm run build
@@ -149,10 +157,10 @@ The same checks run on GitHub for every pull request ([`.github/workflows/ci.yml
 |---|---|
 | `packages/contracts` | Zod schemas shared by API and web: conversations, drafts, profile facts, requests, errors |
 | `packages/core` | Draft lifecycle (exact-version edits, LinkedIn copy-only), policy (verified facts, opt-outs, grounding), waiting-on-me ordering |
-| `packages/ai` | `DraftModel` adapter interface, Gemini adapter, prompt builder that treats messages as data, decision detector, deterministic fake model |
-| `workers/api` | Cloudflare Worker (Hono): inbox, paste, generate, edit, copy, mark-sent; storage in memory or Supabase |
+| `packages/ai` | `DraftModel` and `FactSuggester` adapter interfaces, Gemini adapter, prompt builders that treat messages and resumes as data, decision detector, fact clean-up, deterministic fake model |
+| `workers/api` | Cloudflare Worker (Hono): inbox, paste, generate, edit, copy, mark-sent, Knowledge Base; storage in memory or Supabase |
 | `supabase` | Postgres schema (migrations) with row-level security on every table, and local Supabase config |
-| `apps/web` | React + Vite + Tailwind: inbox, paste form, reply panel |
+| `apps/web` | React + Vite + Tailwind: inbox, paste form, reply panel, Knowledge Base |
 
 ## More of my agentic AI projects
 
