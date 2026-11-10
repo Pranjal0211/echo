@@ -2,7 +2,20 @@
 
 A private assistant for my job search. Recruiter, referral and hiring messages from **Gmail** and **LinkedIn** land in one dashboard with a reply already drafted, in my voice and only saying true things about me. I edit if needed, approve, and send. No more copying every message into ChatGPT, and no more leaving people hanging.
 
-> **Status: planning.** The spec and architecture are in place; implementation starts after the open review items in [`docs/GRILL.md`](docs/GRILL.md) are settled.
+> **Status: Milestone 0 working.** Paste a message → get a draft in your voice → edit → copy, with a "waiting on you" inbox. Runs locally on synthetic data and a deterministic fake model; no real accounts, keys or sends yet.
+
+![Echo inbox: threads sorted by how long they've waited, with a reply panel](docs/screenshots/inbox.jpg)
+
+## What works today (Milestone 0)
+
+- **Paste a message** from LinkedIn or Gmail; it lands in the inbox as *waiting on you*.
+- **Inbox sorted by who's waited longest**, with age badges that turn amber after 24h and red after 48h.
+- **Draft a reply** by picking what you want to say (interested, need details, not now, decline, thanks, follow up), tone, length and extra instructions.
+- **Only you decide:** questions about availability, salary, relocation, start date or visa are flagged, left as `[placeholders]`, and copying is blocked until you fill them in.
+- **Grounded in your profile:** only verified facts reach the model; sensitive ones need an opt-in; invented fact references are dropped with a warning.
+- **LinkedIn:** Copy for LinkedIn → Mark as sent manually, which moves the thread to *waiting on them*. There is no send button for LinkedIn.
+- **Gmail:** shows the recipient and subject; Approve & Send is visible but disabled until Milestone 2.
+- **Edits are versioned:** each edit is a new version, and stale edits are rejected.
 
 ## What it does
 
@@ -43,7 +56,7 @@ The backend's policy layer (not the model) decides what's allowed. A send queue 
 
 | Milestone | Scope | Status |
 |---|---|---|
-| 0 — Foundation | Design system, contracts, database schema, decisions | Planning |
+| 0 — Foundation | Contracts, core rules, model adapter, Worker API, web app; one working paste → draft → copy path | ✅ First slice working |
 | 1 — Knowledge Base + Outreach Studio | Profile and resumes, JD/contact intake, drafting, edit/copy, LinkedIn manual sends, job CRM | — |
 | 2 — Gmail outbound | OAuth `gmail.send`, approval, outbox, idempotent sending | — |
 | 3 — Gmail inbox | Read threads, classify, draft replies in-thread | — |
@@ -70,7 +83,7 @@ echo/
 └── CLAUDE.md            # Claude Code instructions
 ```
 
-Today only `docs/`, `AGENTS.md`, `CLAUDE.md` and this README exist. Code folders are created as each milestone needs them.
+Today `packages/contracts`, `packages/core`, `packages/ai`, `workers/api` and `apps/web` exist. `packages/connectors`, `supabase/` and `evals/` are created when their milestone needs them.
 
 ## Docs
 
@@ -90,7 +103,28 @@ The first commit is the original build kit generated with ChatGPT, unchanged. La
 
 ## Running locally
 
-Not yet. Setup instructions arrive with Milestone 0.
+Needs Node 22+ (see `.nvmrc`). No accounts or API keys.
+
+```bash
+npm install
+npm run dev        # API on http://localhost:8787, web app on http://localhost:5173
+```
+
+Open http://localhost:5173. Data is synthetic and resets when the API restarts.
+
+```bash
+npm test           # 74 tests across contracts, core, ai, api and web
+npm run typecheck
+npm run build
+```
+
+| Package | What's in it |
+|---|---|
+| `packages/contracts` | Zod schemas shared by API and web: conversations, drafts, profile facts, requests, errors |
+| `packages/core` | Draft lifecycle (exact-version edits, LinkedIn copy-only), policy (verified facts, opt-outs, grounding), waiting-on-me ordering |
+| `packages/ai` | `DraftModel` adapter interface, prompt builder that treats messages as data, decision detector, deterministic fake model |
+| `workers/api` | Cloudflare Worker (Hono): inbox, paste, generate, edit, copy, mark-sent; synthetic seed in memory |
+| `apps/web` | React + Vite + Tailwind: inbox, paste form, reply panel |
 
 ## More of my agentic AI projects
 
