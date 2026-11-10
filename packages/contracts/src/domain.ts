@@ -26,6 +26,7 @@ export const FactCategory = z.enum([
   "preference",
   "other",
 ]);
+export type FactCategory = z.infer<typeof FactCategory>;
 
 /** `ask_every_time` facts (salary, visa, notice period…) are never used unless opted in per draft. */
 export const Sensitivity = z.enum(["normal", "ask_every_time"]);
@@ -166,3 +167,15 @@ export const ModelDraftOutput = z.object({
   decisionsNeeded: z.array(z.string()),
 });
 export type ModelDraftOutput = z.infer<typeof ModelDraftOutput>;
+
+/** One fact a model found in a pasted resume. Saved unverified until the owner approves it. */
+export const SuggestedFact = z.object({
+  text: z.string().min(1),
+  category: FactCategory,
+  sensitivity: Sensitivity,
+});
+export type SuggestedFact = z.infer<typeof SuggestedFact>;
+
+/** What a model must return when suggesting facts from a resume. */
+export const FactSuggestionOutput = z.object({ facts: z.array(SuggestedFact) });
+export type FactSuggestionOutput = z.infer<typeof FactSuggestionOutput>;
