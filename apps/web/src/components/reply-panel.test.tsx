@@ -114,4 +114,20 @@ describe("ReplyPanel", () => {
     expect(screen.getByRole("button", { name: /Approve & Send/ })).toBeDisabled();
     expect(screen.queryByRole("button", { name: /Copy for LinkedIn/ })).not.toBeInTheDocument();
   });
+
+  it("falls back to select-and-confirm when the clipboard is blocked", async () => {
+    const user = userEvent.setup();
+    vi.spyOn(navigator.clipboard, "writeText").mockRejectedValueOnce(new DOMException("denied", "NotAllowedError"));
+    const fetchMock = vi.fn().mockResolvedValueOnce(respond(makeDraft({ status: "copied" })));
+    vi.stubGlobal("fetch", fetchMock);
+    render(<ReplyPanel item={makeItem("linkedin", makeDraft())} facts={facts} onChanged={async () => {}} />);
+
+    await user.click(screen.getByRole("button", { name: /Copy for LinkedIn/ }));
+    expect(screen.getByRole("status")).toHaveTextContent(/blocked automatic copying/);
+    expect(fetchMock).not.toHaveBeenCalled();
+
+    await user.click(screen.getByRole("button", { name: /I copied it/ }));
+    expect(fetchMock.mock.calls[0]?.[0]).toBe("/api/drafts/d1/copy");
+    expect(screen.getByRole("button", { name: /Mark as sent manually/ })).toBeEnabled();
+  });
 });
