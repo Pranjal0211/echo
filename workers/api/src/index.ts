@@ -1,10 +1,11 @@
 import { createApp } from "./app.ts";
 import { createModel, type ModelEnv } from "./model-config.ts";
-import { buildSeed } from "./seed.ts";
-import { InMemoryStore } from "./store.ts";
+import { createStore, type StoreEnv } from "./store-config.ts";
 
-// Synthetic data in memory; the model comes from ECHO_MODEL (fake by default, Gemini
-// when configured). Supabase arrives in Milestone 1.
+// Storage comes from ECHO_STORE (memory by default, Supabase when configured) and the
+// model from ECHO_MODEL (fake by default, Gemini when configured).
+
+type Env = ModelEnv & StoreEnv;
 
 let app: ReturnType<typeof createApp> | null = null;
 
@@ -12,9 +13,9 @@ let app: ReturnType<typeof createApp> | null = null;
  * Built on the first request, not at module load: Workers report the clock as the
  * Unix epoch outside a request, which would date every seeded message to 1970.
  */
-function getApp(env: ModelEnv) {
+function getApp(env: Env) {
   app ??= createApp({
-    store: new InMemoryStore(buildSeed(new Date())),
+    store: createStore(env, new Date()),
     model: createModel(env),
     now: () => new Date(),
     newId: () => crypto.randomUUID(),
@@ -23,7 +24,7 @@ function getApp(env: ModelEnv) {
 }
 
 export default {
-  fetch(request: Request, env: ModelEnv, ctx: ExecutionContext) {
+  fetch(request: Request, env: Env, ctx: ExecutionContext) {
     return getApp(env).fetch(request, env, ctx);
   },
-} satisfies ExportedHandler<ModelEnv>;
+} satisfies ExportedHandler<Env>;
