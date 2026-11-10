@@ -100,6 +100,13 @@ describe("GeminiDraftModel", () => {
     });
   });
 
+  it("rejects a response that isn't JSON", async () => {
+    const fn = (async () => new Response("<html>Service error</html>", { status: 200 })) as unknown as typeof fetch;
+    await expect(new GeminiDraftModel({ apiKey: "k", fetch: fn }).generateDraft(makeContext())).rejects.toThrow(
+      "Gemini returned invalid JSON.",
+    );
+  });
+
   it("rejects truncated, empty or invalid output", async () => {
     for (const body of [
       interaction(JSON.stringify(DRAFT), "incomplete"),
