@@ -29,6 +29,19 @@ describe("FakeDraftModel", () => {
     expect(draft.decisionsNeeded).toHaveLength(1);
   });
 
+  it("adds a placeholder for every owner-only decision", async () => {
+    const ctx = makeContext();
+    ctx.conversation.messages[0]!.content =
+      "Are you available? Are you open to relocating? What is your start date? Do you need visa sponsorship? What are your salary expectations?";
+    const draft = await model.generateDraft(ctx);
+    expect(draft.decisionsNeeded).toHaveLength(5);
+    expect(draft.body).toContain("[your availability]");
+    expect(draft.body).toContain("[your preference]");
+    expect(draft.body).toContain("[your start date or notice period]");
+    expect(draft.body).toContain("On work authorization: [your answer].");
+    expect(draft.body).toContain("On compensation: [your answer].");
+  });
+
   it("uses a Re: subject for Gmail", async () => {
     const ctx = makeContext({ channel: "gmail" });
     ctx.conversation.subject = "Frontend role";

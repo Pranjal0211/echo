@@ -42,11 +42,18 @@ describe("assertCanDraftFor", () => {
 describe("enforceGrounding", () => {
   it("drops fact ids the model was not given and warns", () => {
     const result = enforceGrounding(
-      { subject: null, body: "Hi", factIdsUsed: ["f1", "f2", "made-up"], warnings: [], decisionsNeeded: [] },
+      {
+        subject: null,
+        body: "Hi",
+        factIdsUsed: ["f1", "f2", "f3", "made-up"],
+        warnings: [],
+        decisionsNeeded: [],
+      },
       selectUsableFacts(facts),
     );
     expect(result.factIdsUsed).toEqual(["f1"]);
     expect(result.warnings).toHaveLength(1);
+    expect(result.warnings[0]).toContain("aren't available for this draft");
   });
 
   it("leaves grounded output untouched", () => {

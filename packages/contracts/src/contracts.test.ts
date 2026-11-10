@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   CreateConversationRequest,
+  Draft,
   GenerateDraftRequest,
   MAX_MESSAGE_CHARS,
   ModelDraftOutput,
@@ -67,5 +68,50 @@ describe("ModelDraftOutput", () => {
       decisionsNeeded: [],
     });
     expect(result.success).toBe(false);
+  });
+});
+
+describe("Draft", () => {
+  const validDraft = {
+    id: "d1",
+    conversationId: "c1",
+    channel: "linkedin",
+    deliveryCapability: "copy_only",
+    intent: "interested",
+    tone: "warm",
+    length: "short",
+    subject: null,
+    body: "Hi",
+    version: 1,
+    status: "generated",
+    factIdsUsed: [],
+    warnings: [],
+    decisionsNeeded: [],
+    modelId: "fake",
+    createdAt: "2026-11-01T09:00:00.000Z",
+    updatedAt: "2026-11-01T09:00:00.000Z",
+  } as const;
+
+  it("accepts matching channel and delivery capabilities", () => {
+    expect(Draft.safeParse(validDraft).success).toBe(true);
+    expect(
+      Draft.safeParse({ ...validDraft, channel: "gmail", deliveryCapability: "provider_send" }).success,
+    ).toBe(true);
+  });
+
+  it("rejects a LinkedIn draft with provider sending", () => {
+    expect(
+      Draft.safeParse({ ...validDraft, deliveryCapability: "provider_send" }).success,
+    ).toBe(false);
+  });
+
+  it("rejects a Gmail draft with copy-only delivery", () => {
+    expect(
+      Draft.safeParse({
+        ...validDraft,
+        channel: "gmail",
+        deliveryCapability: "copy_only",
+      }).success,
+    ).toBe(false);
   });
 });

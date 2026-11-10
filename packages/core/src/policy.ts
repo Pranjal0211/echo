@@ -37,7 +37,7 @@ export function enforceGrounding(
     dropped > 0
       ? [
           ...output.warnings,
-          `The draft referenced ${dropped} fact(s) that aren't verified in your profile. Check every claim before sending.`,
+          `The draft referenced ${dropped} fact(s) that aren't available for this draft. Check every claim before sending.`,
         ]
       : output.warnings;
   return { ...output, factIdsUsed: grounded, warnings };

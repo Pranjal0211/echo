@@ -18,6 +18,9 @@ const OPENERS: Record<DraftContext["intent"], string> = {
 const PLACEHOLDER: Record<string, string> = {
   "When are you available? Echo won't pick times for you.": "I'm available [your availability].",
   "Do you want to share salary expectations? If so, what range?": "On compensation: [your answer].",
+  "Are you open to relocating or working on-site?": "On location: [your preference].",
+  "What start date or notice period should Echo mention?": "For timing: [your start date or notice period].",
+  "Do you want to mention your work authorization?": "On work authorization: [your answer].",
 };
 
 /**

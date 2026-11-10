@@ -79,8 +79,8 @@ export function markSentManually(draft: Draft, version: number, now: string): Dr
 /** Approval for provider sending. Never possible for copy-only channels like LinkedIn. */
 export function approveForSend(draft: Draft, version: number, now: string): Draft {
   assertVersion(draft, version);
-  if (draft.deliveryCapability !== "provider_send") {
-    throw new DomainError("policy_blocked", "LinkedIn drafts are copied, never sent by Echo.");
+  if (draft.channel !== "gmail" || draft.deliveryCapability !== "provider_send") {
+    throw new DomainError("policy_blocked", "Only Gmail drafts can be sent by Echo.");
   }
   return moveTo(draft, "approved", now);
 }

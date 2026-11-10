@@ -10,7 +10,7 @@
     "apps/*"
   ],
   "engines": {
-    "node": ">=22"
+    "node": "^24.0.0"
   },
   "scripts": {
     "dev": "npm run dev --workspace @echo/api & npm run dev --workspace @echo/web",

@@ -53,7 +53,17 @@ describe("LinkedIn copy flow", () => {
   });
 
   it("can never be approved for sending", () => {
-    expect(() => approveForSend(makeDraft(), 1, T0)).toThrowError(/never sent by Echo/);
+    expect(() => approveForSend(makeDraft(), 1, T0)).toThrowError(/Only Gmail drafts/);
+  });
+
+  it("blocks a LinkedIn draft even when its delivery capability is malformed", () => {
+    const malformed = makeDraft({ channel: "linkedin", deliveryCapability: "provider_send" });
+    expect(() => approveForSend(malformed, 1, T0)).toThrowError(/Only Gmail drafts/);
+  });
+
+  it("blocks Gmail drafts that are marked copy-only", () => {
+    const malformed = makeDraft({ channel: "gmail", deliveryCapability: "copy_only" });
+    expect(() => approveForSend(malformed, 1, T0)).toThrowError(/Only Gmail drafts/);
   });
 });
 

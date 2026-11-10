@@ -126,25 +126,35 @@ export const DraftStatus = z.enum([
 ]);
 export type DraftStatus = z.infer<typeof DraftStatus>;
 
-export const Draft = z.object({
-  id: z.string().min(1),
-  conversationId: z.string().min(1),
-  channel: Channel,
-  deliveryCapability: DeliveryCapability,
-  intent: ReplyIntent,
-  tone: Tone,
-  length: Length,
-  subject: z.string().nullable(),
-  body: z.string().min(1),
-  version: z.number().int().positive(),
-  status: DraftStatus,
-  factIdsUsed: z.array(z.string()),
-  warnings: z.array(z.string()),
-  decisionsNeeded: z.array(z.string()),
-  modelId: z.string().min(1),
-  createdAt: z.iso.datetime(),
-  updatedAt: z.iso.datetime(),
-});
+export const Draft = z
+  .object({
+    id: z.string().min(1),
+    conversationId: z.string().min(1),
+    channel: Channel,
+    deliveryCapability: DeliveryCapability,
+    intent: ReplyIntent,
+    tone: Tone,
+    length: Length,
+    subject: z.string().nullable(),
+    body: z.string().min(1),
+    version: z.number().int().positive(),
+    status: DraftStatus,
+    factIdsUsed: z.array(z.string()),
+    warnings: z.array(z.string()),
+    decisionsNeeded: z.array(z.string()),
+    modelId: z.string().min(1),
+    createdAt: z.iso.datetime(),
+    updatedAt: z.iso.datetime(),
+  })
+  .refine(
+    (draft) =>
+      (draft.channel === "gmail" && draft.deliveryCapability === "provider_send") ||
+      (draft.channel === "linkedin" && draft.deliveryCapability === "copy_only"),
+    {
+      message: "Draft delivery capability must match its channel.",
+      path: ["deliveryCapability"],
+    },
+  );
 export type Draft = z.infer<typeof Draft>;
 
 /** What a model must return. Validated before anything is stored. */
