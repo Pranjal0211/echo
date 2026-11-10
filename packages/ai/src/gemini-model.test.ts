@@ -49,7 +49,7 @@ describe("GeminiDraftModel", () => {
   it("returns the validated draft from the last model output", async () => {
     const { fn } = fakeFetch(interaction(JSON.stringify(DRAFT)));
     const draft = await new GeminiDraftModel({ apiKey: "k", model: "gemini-x", fetch: fn }).generateDraft(makeContext());
-    expect(draft).toEqual(DRAFT);
+    expect(draft).toEqual({ ...DRAFT, modelId: "gemini-x" });
   });
 
   it.each([
@@ -63,6 +63,32 @@ describe("GeminiDraftModel", () => {
     const result = new GeminiDraftModel({ apiKey: "k", fetch: fn }).generateDraft(makeContext());
     await expect(result).rejects.toBeInstanceOf(ModelUnavailableError);
     await expect(result).rejects.toMatchObject({ reason });
+  });
+
+  it("falls back to the next model when the first is overloaded and says which one drafted", async () => {
+    const models: string[] = [];
+    const fn = (async (_url: string, init: RequestInit) => {
+      const { model } = JSON.parse(String(init.body));
+      models.push(model);
+      return model === "busy-model"
+        ? new Response(JSON.stringify({ error: { code: "service_unavailable" } }), { status: 503 })
+        : new Response(JSON.stringify(interaction(JSON.stringify(DRAFT))), { status: 200 });
+    }) as unknown as typeof fetch;
+    const result = await new GeminiDraftModel({
+      apiKey: "k",
+      model: "busy-model",
+      fallbackModels: ["lite-model"],
+      fetch: fn,
+    }).generateDraft(makeContext());
+    expect(models).toEqual(["busy-model", "lite-model"]);
+    expect(result.modelId).toBe("lite-model");
+  });
+
+  it("does not fall back on a bad key", async () => {
+    const { fn, calls } = fakeFetch({ error: {} }, 401);
+    const result = new GeminiDraftModel({ apiKey: "k", fallbackModels: ["lite-model"], fetch: fn }).generateDraft(makeContext());
+    await expect(result).rejects.toMatchObject({ reason: "auth" });
+    expect(calls).toHaveLength(1);
   });
 
   it("reports a network failure as unavailable", async () => {
