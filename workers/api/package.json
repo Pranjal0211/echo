@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "wrangler dev --port 8787",
     "test": "vitest run",
-    "typecheck": "tsc -p tsconfig.json"
+    "typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.node.json"
   },
   "dependencies": {
     "@echo/ai": "*",
