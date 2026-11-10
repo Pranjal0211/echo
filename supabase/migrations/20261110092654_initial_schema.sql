@@ -137,6 +137,9 @@ begin
     (p_conversation->>'waiting_since')::timestamptz
   )
   on conflict (id) do update set
+    channel = excluded.channel,
+    contact_id = excluded.contact_id,
+    import_source = excluded.import_source,
     subject = excluded.subject,
     waiting_on = excluded.waiting_on,
     waiting_since = excluded.waiting_since;
