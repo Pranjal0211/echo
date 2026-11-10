@@ -16,7 +16,13 @@
     "dev": "npm run dev --workspace @echo/api & npm run dev --workspace @echo/web",
     "test": "npm run test --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
-    "build": "npm run build --workspaces --if-present"
+    "build": "npm run build --workspaces --if-present",
+    "db:start": "supabase start -x realtime,storage-api,imgproxy,edge-runtime,logflare,vector,supavisor",
+    "db:stop": "supabase stop",
+    "db:env": "node workers/api/scripts/write-dev-vars.ts",
+    "db:seed": "node workers/api/scripts/seed-supabase.ts",
+    "db:reset": "supabase db reset && npm run db:seed",
+    "test:db": "ECHO_DB_TESTS=1 npm run test --workspace @echo/api"
   },
   "devDependencies": {
     "supabase": "^3.1.0",
