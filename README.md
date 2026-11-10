@@ -91,3 +91,16 @@ The first commit is the original build kit generated with ChatGPT, unchanged. La
 ## Running locally
 
 Not yet. Setup instructions arrive with Milestone 0.
+
+## More of my agentic AI projects
+
+| Project | What it is | Built with |
+|---|---|---|
+| **[Echo](https://github.com/Pranjal0211/echo)** (this repo) | AI communication twin: drafts job-search replies for Gmail and LinkedIn in my voice; nothing sends without my approval | React, TypeScript, Cloudflare Workers, Supabase, LLM adapter |
+| **[agent-crew](https://github.com/Pranjal0211/agent-crew)** | My AI build crew: Claude Code agents (planner, builder, tester, designer) plus a `/round` team-lead skill that picks tasks, builds them, checks them in a real browser and opens PRs on other projects | Claude Code subagents, skills, Playwright |
+| **[agent-office](https://github.com/Pranjal0211/agent-office)** | A virtual office where my AI agents work as employees: a live crew board showing who each agent is, what it's doing now, and what's next. Built and improved by agent-crew | HTML, CSS, JavaScript |
+| Claude Agent SDK series | Hands-on learning series building agents with the Claude Agent SDK (in progress, not published yet) | TypeScript, Claude Agent SDK |
+
+## License
+
+[MIT](LICENSE) © 2026 Pranjal Sharma
