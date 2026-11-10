@@ -2,9 +2,10 @@ name = "echo-api"
 main = "src/index.ts"
 compatibility_date = "2026-11-01"
 
-# In-memory synthetic data. The fake model needs no secrets.
-# For real drafts, set ECHO_MODEL and GEMINI_API_KEY in .dev.vars (see .dev.vars.example).
+# Defaults: synthetic data in memory and the fake model, so nothing needs secrets.
+# For real drafts or a real database, set them in .dev.vars (see .dev.vars.example).
 [vars]
+ECHO_STORE = "memory"
 ECHO_MODEL = "fake"
 GEMINI_MODEL = "gemini-3.8-flash"
 # Used when the main model is overloaded or rate limited.
