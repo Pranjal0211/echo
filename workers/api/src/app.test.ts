@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { createApp } from "./app.ts";
+import { makeTestApp } from "./test-app.ts";
 
 describe("api skeleton", () => {
-  const app = createApp();
+  const { app } = makeTestApp();
 
   it("reports health", async () => {
     const res = await app.request("/api/health");
