@@ -130,4 +130,17 @@ describe("ReplyPanel", () => {
     expect(fetchMock.mock.calls[0]?.[0]).toBe("/api/drafts/d1/copy");
     expect(screen.getByRole("button", { name: /Mark as sent manually/ })).toBeEnabled();
   });
+
+  it("blocks copying while [placeholders] are unfilled", async () => {
+    const user = userEvent.setup();
+    const draft = makeDraft({ body: "Hi Sam,\n\nI'm free [your availability].\n\nJordan" });
+    render(<ReplyPanel item={makeItem("linkedin", draft)} facts={facts} onChanged={async () => {}} />);
+    expect(screen.getByRole("button", { name: /Copy for LinkedIn/ })).toBeDisabled();
+    expect(screen.getByText(/Fill in \[your availability\]/)).toBeInTheDocument();
+
+    const box = screen.getByLabelText("Draft text");
+    await user.clear(box);
+    await user.type(box, "Hi Sam, I'm free Tuesday afternoon. Jordan");
+    expect(screen.getByRole("button", { name: /Copy for LinkedIn/ })).toBeEnabled();
+  });
 });
