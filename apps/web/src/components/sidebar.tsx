@@ -66,7 +66,7 @@ export function Sidebar({
         ))}
       </nav>
       <p className="mt-auto hidden px-5 py-4 text-xs text-muted md:block">
-        Milestone 0 · synthetic data · fake model. Nothing is ever sent.
+        Synthetic data. Nothing is sent without your approval.
       </p>
     </aside>
   );
