@@ -52,6 +52,14 @@ const respond = (draft: Draft) => new Response(JSON.stringify({ draft }));
 describe("ReplyPanel", () => {
   afterEach(() => vi.unstubAllGlobals());
 
+  it("shows why the first draft failed", async () => {
+    const failure = { error: { code: "model_error", message: "Gemini's free-tier limit was reached." } };
+    vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify(failure), { status: 429 })));
+    render(<ReplyPanel item={makeItem("linkedin")} facts={facts} onChanged={async () => {}} />);
+    await userEvent.click(screen.getByRole("button", { name: /Draft a reply/ }));
+    expect(screen.getByRole("alert")).toHaveTextContent("Gemini's free-tier limit was reached.");
+  });
+
   it("drafts a reply and shows decisions and facts used", async () => {
     vi.stubGlobal("fetch", vi.fn(async () => respond(makeDraft())));
     render(<ReplyPanel item={makeItem("linkedin")} facts={facts} onChanged={async () => {}} />);
