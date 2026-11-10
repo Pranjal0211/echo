@@ -12,8 +12,8 @@ const INTENT_GUIDE: Record<DraftContext["intent"], string> = {
 };
 
 /** Untrusted text can't close our tags and smuggle in instructions. */
-function escapeData(text: string): string {
-return text.replaceAll("&", "＆").replaceAll("<", "‹").replaceAll(">", "›").replaceAll('"', "＂");
+export function escapeData(text: string): string {
+  return text.replaceAll("&", "＆").replaceAll("<", "‹").replaceAll(">", "›").replaceAll('"', "＂");
 }
 
 export interface DraftPrompt {
