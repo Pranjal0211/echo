@@ -71,7 +71,7 @@ export class GeminiDraftModel implements DraftModel {
     }
 
     if (!response.ok) throw httpError(response.status);
-    const interaction = (await response.json()) as InteractionResponse;
+const interaction = (await response.json().catch(() => { throw new ModelOutputError("Gemini returned invalid JSON."); })) as InteractionResponse;
     return parseModelOutput(outputText(interaction));
   }
 }
