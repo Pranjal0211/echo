@@ -1,0 +1,7 @@
+name = "echo-api"
+main = "src/index.ts"
+compatibility_date = "2026-11-01"
+
+# Milestone 0: in-memory synthetic data and the fake model. No secrets needed.
+[vars]
+ECHO_MODEL = "fake"
