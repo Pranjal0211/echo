@@ -211,6 +211,12 @@ export function ReplyPanel({
         </div>
       )}
 
+      {error && (
+        <p role="alert" className="rounded-xl bg-danger-soft p-3 text-sm text-danger">
+          {error}
+        </p>
+      )}
+
       {draft && (
         <>
           {draft.decisionsNeeded.length > 0 && !finished && (
@@ -255,11 +261,6 @@ export function ReplyPanel({
             </div>
           )}
 
-          {error && (
-            <p role="alert" className="text-sm text-danger">
-              {error}
-            </p>
-          )}
           {blocked && !finished && (
             <p className="rounded-xl bg-warn-soft p-3 text-sm text-warn">
               Fill in {placeholders.join(", ")} before copying.
