@@ -13,10 +13,14 @@ export function ConversationView({ item, now, children }: { item: InboxItem; now
         <div className="min-w-0">
           <h2 className="text-lg font-semibold">{conversation.subject ?? contact.name}</h2>
           <p className="text-sm text-muted">
-            {contact.name}
-            {contact.role && ` · ${contact.role}`}
-            {contact.company && ` at ${contact.company}`}
-            {contact.verifiedEmail && <span> · {contact.verifiedEmail}</span>}
+            {[
+              conversation.subject ? contact.name : null,
+              contact.role,
+              contact.company && `at ${contact.company}`,
+              contact.verifiedEmail,
+            ]
+              .filter(Boolean)
+              .join(" · ") || contact.relationship.replace("_", " ")}
           </p>
         </div>
         <div className="flex flex-wrap gap-1.5">
